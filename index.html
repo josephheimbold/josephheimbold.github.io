@@ -1,0 +1,2779 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Name</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<script>{ const stem = new URLSearchParams(location.search).get('portfolio') === 'stem'; document.documentElement.classList.toggle('stem', stem); document.documentElement.dataset.show = stem ? 'stem' : 'non'; }</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta name="description" content="Joseph Heimbold's portfolio: STEM projects (robotics, coding, 3D models) and photography, travel and cooking.">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* End-portal palette */
+    --deep: #0e4a5c;
+    --blue: #2b7fd4;
+    --cyan: #3fc8db;
+    --teal: #1fb5a0;
+    --green: #3ccf7a;
+    --mint: #a6f0d2;
+
+    --text: #10303a;
+    --muted: #48636d;
+    --grad: linear-gradient(90deg, var(--blue), var(--teal), var(--green));
+
+    /* Glass (tint 56) */
+    --glass: rgba(206,222,227,0.62);
+    --glass-strong: rgba(255,255,255,0.75);
+    --border: rgba(255,255,255,0.75);
+    --shadow: 0 10px 40px -12px rgba(var(--sh),.28);
+    --radius: 28px;
+    --spring: cubic-bezier(.3, 1.25, .5, 1);
+    --brand: #2B7FD4;        /* favicon blue */
+    --brand-dark: #1F68B5;
+    --brand-light: #B7D2EF;
+    --bg-blur: 5px;
+    --bg-opacity: 0.62;
+    --sh: 14,74,92;          /* shadow tint */
+    --bsh: 31,104,181;       /* brand-button shadow tint */
+    --ink: 16,48,58;         /* dots, dividers */
+  }
+  /* STEM portfolio: warm colors (same layout, everything else follows these) */
+  html.stem {
+    --deep: #5c2410;
+    --blue: #e8642c;
+    --cyan: #f59e3b;
+    --teal: #e4502f;
+    --green: #f2b33d;
+    --mint: #ffe1a8;
+    --text: #3a1d12;
+    --muted: #6e5247;
+    --glass: rgba(238,222,208,0.62);
+    --shadow: 0 10px 40px -12px rgba(92,40,14,.28);
+    --brand: #E2622A;
+    --brand-dark: #C24E1B;
+    --brand-light: #F6CDB3;
+    --sh: 92,40,14;
+    --bsh: 194,78,27;
+    --ink: 58,29,18;
+    --stage-tint: rgba(250,218,192,.6);   /* 3D model stage */
+  }
+  html.stem .logo-icon { filter: hue-rotate(168deg) saturate(1.1); }
+
+  /* What each portfolio shows */
+  html[data-show="stem"] #cooking, html[data-show="stem"] nav a[href="#cooking"],
+  html[data-show="non"] #projects, html[data-show="non"] nav a[href="#projects"],
+  html[data-show="non"] #models, html[data-show="non"] nav a[href="#models"] { display: none !important; }
+  html[data-show="stem"] #gallery-filters { display: none; }
+
+  /* STEM / Non-STEM switch */
+  .brand-row { display: flex; align-items: center; gap: 12px; }
+  .mode-switch { position: relative; display: flex; padding: 5px; border-radius: 999px; user-select: none; -webkit-user-select: none; }
+  .mode-switch button {
+    position: relative; z-index: 1; border: 0; background: none; font: inherit; font-weight: 600; font-size: .92rem;
+    padding: 7px 16px; border-radius: 999px; cursor: pointer; color: var(--muted); transition: color .3s; white-space: nowrap;
+  }
+  .mode-switch button:hover { color: var(--text); }
+  .mode-switch button.on { color: #fff; }
+  .mode-switch .knob {
+    position: absolute; top: 5px; bottom: 5px; left: 0; width: 0; border-radius: 999px; background: var(--brand);
+    box-shadow: 0 4px 12px -4px rgba(var(--bsh),.55);
+    transition: transform .45s var(--spring), width .45s var(--spring), background .4s;
+  }
+  .mode-switch.still .knob { transition: none; }
+  /* Switching portfolios: a white veil fades over the page (cheap: one layer), the page
+     swaps underneath, and the veil fades away. The header stays and its colors fade. */
+  #veil { position: fixed; inset: 0; z-index: 15; background: #fff; opacity: 0; pointer-events: none; transition: opacity .24s ease; }
+  html.switching #veil { opacity: 1; transition-duration: .2s; }
+  nav { transition: background-color .5s ease; }
+  nav a { transition: color .5s ease; }
+  .logo, .mode-switch { transition: background-color .5s ease, color .5s ease; }
+  .mode-switch .knob { transition: transform .45s var(--spring), width .45s var(--spring), background-color .5s ease; }
+  .logo-icon { transition: filter .5s ease; }
+  @media (prefers-reduced-motion: reduce) { #veil, nav, nav a, .logo, .mode-switch, .mode-switch .knob, .logo-icon { transition: none !important; } }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-padding-top: 100px; }
+  html.no-select, html.no-select * { user-select: none !important; -webkit-user-select: none !important; }
+  body {
+    font-family: Outfit, system-ui, sans-serif;
+    color: var(--text);
+    background: #fff;
+    line-height: 1.55;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  body.modal-open { overflow: hidden; }
+  svg.i { width: 1em; height: 1em; display: block; }
+
+  /* Falling End-portal squares. The canvas scrolls with the page (it covers the
+     viewport plus a buffer above/below), so fast scrolling never outruns it. */
+  #portal {
+    position: absolute; left: 0; top: 0; z-index: -1; pointer-events: none; display: block;
+    will-change: transform; filter: blur(var(--bg-blur)); opacity: var(--bg-opacity);
+  }
+
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .wrap { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+  main.wrap { flex: 1; }
+  .grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .item { position: relative; }
+
+  /* Header / nav */
+  header { position: sticky; top: 0; z-index: 20; padding: 16px 0; }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .logo { font-weight: 800; font-size: 1.35rem; display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); padding: 8px 18px 8px 8px; border-radius: 999px; }
+  /* the site's favicon (regenerate it with tools/make-favicon.bat) */
+  .logo-icon {
+    flex: none; width: 30px; height: 30px; display: block;
+  }
+  nav {
+    position: relative; display: flex; gap: 4px; padding: 6px; border-radius: 999px;
+    background: var(--brand) !important; border-color: rgba(255,255,255,.3) !important;
+    touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab;
+  }
+  nav.dragging { cursor: grabbing; }
+  .nav-pill {
+    position: absolute; top: 6px; bottom: 6px; left: 0; width: 0;
+    background: #fff; border-radius: 999px;
+    box-shadow: 0 2px 12px -4px rgba(var(--sh),.35);
+    transition: transform .5s var(--spring), width .5s var(--spring);
+  }
+  nav.dragging .nav-pill { transition: none; }
+  nav a {
+    position: relative; text-decoration: none; color: rgba(255,255,255,.85);
+    padding: 8px 16px; border-radius: 999px; white-space: nowrap;
+    transition: color .25s; -webkit-user-drag: none;
+  }
+  nav a:hover { color: #fff; }
+  nav a.on { color: var(--brand); }
+
+  /* Sections: each title row is its own glass bar */
+  section { padding-top: 70px; }
+  .head {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 22px; padding: 10px 10px 10px 26px; min-height: 68px;
+  }
+  .head-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .head h2 { font-size: clamp(1.7rem, 3.4vw, 2.3rem); font-weight: 800; line-height: 1.1; }
+  .head p { color: var(--muted); padding-right: 14px; white-space: pre-wrap; }
+  .head-link { display: inline-flex; align-items: center; gap: 14px; color: inherit; text-decoration: none; }
+  .head-link .go {
+    display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%;
+    background: var(--brand); color: #fff; font-size: 1.1rem;
+    box-shadow: 0 4px 12px -4px rgba(var(--bsh),.55);
+    transition: transform .35s var(--spring), background .2s, color .2s;
+  }
+  .head-link:hover .go { transform: translateX(6px); background: var(--brand-dark); color: #fff; }
+
+  /* Single-section pages (?page=gallery etc.) */
+  .back { display: none; align-items: center; gap: 8px; margin-top: 8px; padding: 8px 18px; border-radius: 999px; color: var(--text); text-decoration: none; transition: background .2s; }
+  .back:hover { background: #fff; }
+  body.single .back { display: inline-flex; }
+  body.single main > section:not(.active) { display: none; }
+  body.single main > section.active { padding-top: 24px; }
+  body.single .head-link .go { display: none; }
+
+  /* Images & placeholders */
+  .ph, .media img { position: relative; border-radius: 20px; overflow: hidden; width: 100%; }
+  /* .media clips cropped/zoomed images; "show whole image" letterboxes on a soft background */
+  .media { overflow: hidden; border-radius: 20px; position: relative; }
+  .media:has(> img) { background: rgba(255,255,255,.55); }
+  .media video { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 20px; background: #0d2a33; }
+  .play-badge {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; pointer-events: none;
+    width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center;
+    background: rgba(255,255,255,.85); color: var(--text); font-size: 1.3rem; transition: opacity .25s;
+    box-shadow: 0 4px 16px -6px rgba(0,0,0,.4);
+  }
+  .play-badge svg { margin-left: 3px; }
+  figure.playing .play-badge { opacity: 0; }
+  .ph {
+    background: linear-gradient(135deg, hsl(var(--h,190) 70% 72%), hsl(calc(var(--h,190) + 35) 70% 60%));
+    display: grid; place-items: center; color: rgba(255,255,255,.95);
+  }
+  .ph svg { width: 40px; height: 40px; }
+  .media img { display: block; height: 100%; object-fit: contain; }
+
+  /* Home bento */
+  #home { padding-top: 24px; }
+  .bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 170px; gap: 18px; }
+  .tile { padding: 28px; overflow: hidden; position: relative; }
+  /* Top row: intro fills the space, the feature box hugs its image */
+  .hero-row { display: grid; grid-template-columns: 1fr auto; gap: 18px; }
+  .t-intro { display: flex; flex-direction: column; justify-content: flex-end; min-height: 340px; }
+  .t-intro h1 { font-size: clamp(2.4rem, 5vw, 3.8rem); line-height: 1; font-weight: 800; margin-bottom: 16px; }
+  .t-intro p { color: var(--muted); max-width: 42ch; font-size: 1.05rem; }
+  .t-feature { padding: 12px; align-self: start; }
+  .t-feature .media { width: fit-content; }
+  .t-feature .media > img, .t-feature .media > video { display: block; width: auto; height: auto; max-width: min(640px, 52vw); max-height: 440px; }
+  .t-feature .media > .ph { width: min(560px, 48vw); aspect-ratio: 4/3; }
+  /* a cropped shape: fixed height, width follows the chosen aspect */
+  .t-feature .media.shaped { height: min(440px, calc(var(--fw) / (var(--ar)))); aspect-ratio: var(--ar); width: auto; }
+  .t-feature .media.shaped > img, .t-feature .media.shaped > video { width: 100%; height: 100%; max-width: none; max-height: none; }
+  .label { position: absolute; z-index: 2; padding: 7px 16px; border-radius: 999px; font-size: .9rem; background: rgba(255,255,255,.85); pointer-events: none; }
+  .t-feature .label { left: 26px; bottom: 26px; }
+  .t-stat { display: flex; flex-direction: column; justify-content: space-between; text-decoration: none; color: inherit; transition: .3s; }
+  .t-stat:hover { background: var(--glass-strong); transform: translateY(-3px); }
+  .t-stat strong { font-size: 2.6rem; font-weight: 800; line-height: 1; }
+  .t-stat span { color: var(--muted); }
+
+  /* Gallery */
+  /* Gallery: items are placed by JS (layoutGallery) so each one can be any size.
+     Main page: a 2-row strip that drifts sideways and loops. Gallery page: top-down. */
+  .gal { position: relative; }
+  .gal-view { position: relative; }
+  .gal.strip .gal-view { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding: 44px 0; margin: -44px calc(50% - 50vw); overscroll-behavior-x: contain; }
+  .gal.strip .gal-view::-webkit-scrollbar { display: none; }
+  .gal.strip.static .gal-view { padding-inline: calc(50vw - 50%); }   /* not looping: line up with the page */
+  .gal.strip .gal-view.grabbing { cursor: grabbing; }
+  .gal-track { position: relative; }
+  .gal-item { position: absolute; margin: 0; padding: 8px; cursor: zoom-in; transition: transform .3s var(--spring), box-shadow .3s; }
+  .gal-item:hover { transform: scale(1.045); z-index: 3; box-shadow: 0 18px 40px -14px rgba(var(--sh),.45); }
+  .gal-item .media { width: 100%; height: 100%; }
+  .gal-item .media img, .gal-item .media video, .gal-item .media .ph { width: 100%; height: 100%; }
+  .gal-item .media video { object-fit: cover !important; background: transparent; }
+  body.editing .gal-item { cursor: pointer; }
+  body.editing .gal-item:hover { transform: none; }
+  .gal-item .item-tools { flex-wrap: wrap; justify-content: flex-end; max-width: calc(100% - 20px); top: 12px !important; right: 12px !important; }
+  .gal-btn {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 4;
+    width: 52px; height: 52px; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center;
+    background: var(--brand); color: #fff; font-size: 1.4rem; box-shadow: 0 6px 20px -8px rgba(var(--sh),.45); transition: background .2s;
+  }
+  .gal-btn:hover { background: var(--brand-dark); }
+  .gal-btn.prev { left: -78px; } .gal-btn.next { right: -78px; }
+  @media (max-width: 1340px) { .gal-btn.prev { left: 8px; } .gal-btn.next { right: 8px; } }
+  .gal-empty { padding: 40px; text-align: center; color: var(--muted); }
+  /* Edit mode: drag the corner to resize */
+  .resize-handle {
+    display: none; position: absolute; right: 2px; bottom: 2px; z-index: 6; width: 26px; height: 26px; border-radius: 50%;
+    border: 0; padding: 0; background: var(--brand); color: #fff; cursor: nwse-resize; touch-action: none;
+    place-items: center; box-shadow: 0 2px 8px -2px rgba(0,0,0,.35);
+  }
+  body.editing .resize-handle { display: grid; }
+  html.resizing, html.resizing * { cursor: nwse-resize !important; }
+  /* Info bubble that drops down from the hovered gallery item */
+  #hover-tip {
+    position: fixed; z-index: 95; pointer-events: none; padding: 10px 16px 11px; border-radius: 16px; text-align: center;
+    max-width: 280px; background: rgba(255,255,255,.92); border: 1px solid var(--border);
+    box-shadow: 0 14px 34px -12px rgba(var(--sh),.45); opacity: 0; transform: translateY(-10px) scale(.96);
+    transition: opacity .18s, transform .25s var(--spring);
+  }
+  #hover-tip.above { transform: translateY(10px) scale(.96); }
+  #hover-tip.show { opacity: 1; transform: none; }
+  #hover-tip::before {
+    content: ''; position: absolute; left: var(--ax, 50%); top: -7px; width: 12px; height: 12px; margin-left: -6px; transform: rotate(45deg);
+    background: inherit; border: inherit; border-right: 0; border-bottom: 0; border-radius: 3px 0 0 0;
+  }
+  #hover-tip.above::before { top: auto; bottom: -7px; border: inherit; border-left: 0; border-top: 0; border-radius: 0 0 3px 0; }
+  #hover-tip .t { font-weight: 600; line-height: 1.25; }
+  #hover-tip .l { color: var(--muted); font-size: .85rem; margin-top: 2px; }
+  #hover-tip .more { color: var(--brand); font-size: .78rem; font-weight: 600; margin-top: 6px; letter-spacing: .02em; }
+  /* (older masonry rules, kept for anything else using .gallery) */
+  /* Masonry: each box takes the shape of its image */
+  .gallery { columns: 4; column-gap: 18px; }
+  @media (max-width: 860px) { .gallery { columns: 3; } }
+  @media (max-width: 600px) { .gallery { columns: 2; column-gap: 12px; } }
+  .gallery figure { padding: 10px; cursor: zoom-in; transition: transform .3s, background .3s; break-inside: avoid; margin-bottom: 18px; }
+  .gallery figure:hover { transform: translateY(-6px); background: var(--glass-strong); }
+  .gallery .media { aspect-ratio: 1; }
+  .gallery .media:has(> img) { aspect-ratio: auto; }
+  .gallery .media:has(> video) { aspect-ratio: 16/9; }
+  .gallery .media img { height: auto; display: block; }
+  .gallery .media[style*="aspect-ratio"] img, .gallery .media .ph { height: 100%; }
+  .gallery figcaption { padding: 10px 8px 2px; font-weight: 600; line-height: 1.3; }
+  .gallery figcaption > span { display: block; }
+  .gallery figcaption .sub { font-weight: 400; font-size: .85rem; color: var(--muted); margin-top: 2px; }
+  .gallery figcaption .sub:empty { display: none; }
+  body.editing .gallery figcaption .sub:empty { display: inline-block; }
+
+  /* Chips (filters inside a title bar) */
+  .chips { display: flex; gap: 4px; padding: 5px; border-radius: 999px; flex-wrap: wrap; background: rgba(255,255,255,.45); }
+  .chip { border: 0; background: transparent; font: inherit; color: var(--muted); padding: 7px 16px; border-radius: 999px; cursor: pointer; transition: .2s; }
+  .chip:hover { color: var(--text); }
+  .chip.on { background: #fff; color: var(--text); box-shadow: 0 2px 10px -4px rgba(var(--sh),.3); }
+
+  /* Cooking showcase */
+  .dishes { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; align-content: start; }
+  .dish { padding: 12px; display: flex; flex-direction: column; transition: .3s; cursor: pointer; }
+  .dish:hover { transform: translateY(-6px); background: var(--glass-strong); }
+  .dish .media { aspect-ratio: 4/3; position: relative; }
+  .dish .media .ph, .dish .media img { height: 100%; }
+  .count { position: absolute; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: .82rem; background: rgba(255,255,255,.85); }
+  .dish-body { padding: 16px 8px 8px; display: flex; flex-direction: column; flex: 1; }
+  .dish h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 6px; }
+  .dish p { color: var(--muted); flex: 1; }
+  .pills { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+  .pills span { font-size: .78rem; padding: 3px 10px; border-radius: 999px; background: #fff; }
+  .empty { padding: 40px; text-align: center; color: var(--muted); grid-column: 1 / -1; }
+
+  /* Showcase pop-up */
+  .modal {
+    position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px;
+    background: rgba(255,255,255,.35);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    opacity: 0; pointer-events: none; transition: opacity .25s;
+  }
+  .modal.open { opacity: 1; pointer-events: auto; }
+  .modal-card {
+    width: min(1040px, 100%); max-height: calc(100vh - 32px); overflow: auto;
+    display: grid; grid-template-columns: 1.45fr 1fr; gap: 26px; padding: 16px;
+    position: relative;
+    transform: translateY(16px) scale(.98); transition: transform .35s var(--spring);
+  }
+  .modal.open .modal-card { transform: none; }
+  .viewer { position: relative; aspect-ratio: 4/3; }
+  .viewer .ph, .viewer img { height: 100%; }
+  .arrow-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
+    background: rgba(255,255,255,.85); color: var(--text); font-size: 1.3rem;
+    display: grid; place-items: center; transition: .2s;
+  }
+  .arrow-btn:hover { background: #fff; }
+  .arrow-btn.prev { left: 12px; } .arrow-btn.next { right: 12px; }
+  .viewer .count { bottom: 12px; right: 50%; transform: translateX(50%); }
+  /* padding gives the selected thumbnail's outline room so it isn't clipped */
+  .thumbs { display: flex; gap: 10px; margin: 6px -5px 0; padding: 5px; overflow-x: auto; }
+  .thumbs button { flex: 0 0 72px; height: 72px; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 14px; opacity: .55; transition: .2s; outline: 2px solid transparent; outline-offset: 2px; }
+  .thumbs button.on { opacity: 1; outline-color: var(--teal); }
+  .thumbs .ph, .thumbs img { height: 100%; border-radius: 12px; }
+  .thumbs button { overflow: hidden; }
+  .thumbs .ph svg { width: 20px; height: 20px; }
+  .modal-text { padding: 18px 10px 10px 0; }
+  .modal-text h3 { font-size: 2rem; font-weight: 800; line-height: 1.1; margin: 10px 0 16px; }
+  .modal-text p { color: var(--muted); margin-bottom: 14px; font-size: 1.05rem; }
+  .close-btn { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: #fff; cursor: pointer; font-size: 1.1rem; z-index: 2; display: grid; place-items: center; color: var(--text); }
+
+  /* Coding projects (rows) */
+  .rows { display: grid; gap: 16px; align-content: start; }
+  .row { display: grid; grid-template-columns: 200px 1fr auto; gap: 26px; align-items: center; padding: 14px 28px 14px 14px; transition: background .3s; }
+  .row:hover { background: var(--glass-strong); }
+  .row { cursor: pointer; }
+  .row .photo-count { display: inline-flex; align-items: center; gap: 4px; }
+  .icon-tile.big { height: 100%; aspect-ratio: auto; }
+  .icon-tile.big img { height: 50%; }
+  .m-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .m-links a { flex-direction: row; }
+  .row .ph { aspect-ratio: 4/3; }
+  .icon-tile { aspect-ratio: 4/3; border-radius: 20px; background: rgba(255,255,255,.6); display: grid; place-items: center; }
+  .icon-tile img { width: auto; height: 76%; max-width: 76%; object-fit: contain; border-radius: 16px; }
+  .row h3 { font-size: 1.4rem; font-weight: 600; }
+  .row p { color: var(--muted); }
+  .links { display: flex; flex-direction: column; gap: 8px; }
+  .links a { text-decoration: none; color: var(--text); background: #fff; padding: 8px 16px; border-radius: 999px; font-size: .9rem; text-align: center; transition: .2s; white-space: nowrap; }
+  .links a:hover { background: var(--text); color: #fff; }
+  .links a.dl { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--teal); color: #fff; font-weight: 600; }
+  .links a.dl:hover { background: var(--deep); }
+  .links a.dl small { font-weight: 400; opacity: .85; }
+  .file-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 200px; padding: 4px 4px 4px 10px; border-radius: 999px; background: #fff; font-size: .8rem; }
+  .file-chip > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-chip .tool { width: 22px; height: 22px; flex: none; box-shadow: none; background: #eaf3f4; }
+
+  /* Pager: sideways pages with arrows + dots */
+  .pager { position: relative; }
+  .pager-view { overflow: hidden; padding: 30px; margin: -30px; touch-action: pan-y; }
+  .pager-track { display: flex; gap: 60px; transition: transform .6s var(--spring); align-items: flex-start; }
+  .pager-page { flex: 0 0 100%; min-width: 0; }
+  .pager-btn {
+    position: absolute; top: calc(50% - 37px); transform: translateY(-50%);
+    width: 52px; height: 52px; border-radius: 50%; cursor: pointer;
+    border: 0; background: var(--brand); color: #fff; font-size: 1.4rem;
+    box-shadow: 0 6px 20px -8px rgba(var(--sh),.45);
+    display: grid; place-items: center; transition: background .2s;
+  }
+  .pager-btn.prev { left: -78px; }
+  .pager-btn.next { right: -78px; }
+  .pager-btn:hover:not(:disabled) { background: var(--brand-dark); }
+  .pager-btn:disabled { background: var(--brand-light); cursor: default; box-shadow: none; }
+  .pager-dots { display: flex; align-items: center; gap: 8px; width: fit-content; height: 52px; margin: 22px auto 0; padding: 0 20px; border-radius: 999px; }
+  .pager-dots button { width: 10px; height: 10px; padding: 0; border: 0; border-radius: 999px; background: rgba(var(--ink),.25); cursor: pointer; transition: width .4s var(--spring), background .3s; }
+  .pager-dots button.on { width: 28px; background: var(--brand); }
+  .pager.one-page .pager-btn, .pager.one-page .pager-dots { display: none; }
+
+  /* 3D models */
+  .model-stage { display: grid; grid-template-columns: 1.6fr 1fr; gap: 18px; }
+  .stage { padding: 12px; }
+  .stl-viewer {
+    height: 100%; min-height: 380px; border-radius: 20px; cursor: grab; overflow: hidden;
+    background: radial-gradient(circle at 50% 35%, #fff, var(--stage-tint, rgba(200,240,235,.6)) 75%);
+    outline: 2px dashed transparent; outline-offset: -8px; transition: outline-color .2s;
+  }
+  .stl-viewer:active { cursor: grabbing; }
+  .stl-viewer.dragging { outline-color: var(--teal); }
+  .stl-viewer canvas { display: block; width: 100%; height: 100%; }
+  .stage .label { left: 26px; top: 26px; }
+  .model-list { display: grid; gap: 14px; align-content: start; }
+  .model-item { cursor: pointer; transition: background .2s; }
+  .model-item:hover { background: var(--glass-strong); }
+  .model-item { padding: 10px; display: grid; grid-template-columns: 110px 1fr; gap: 16px; align-items: center; }
+  .model-item .stl-viewer { min-height: 0; aspect-ratio: 1; height: auto; border-radius: 16px; }
+  .model-item h3 { font-weight: 600; font-size: 1.1rem; }
+  .model-item p { color: var(--muted); font-size: .9rem; }
+
+  /* About */
+  .about { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
+  .about .glass { padding: 36px; }
+  .about h3 { font-size: 1.6rem; font-weight: 600; margin-bottom: 14px; }
+  .about p { color: var(--muted); margin-bottom: 14px; font-size: 1.05rem; }
+  .skills { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .skill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 14px; background: #fff; font-size: .92rem; }
+
+  /* Full-width footer; squares pop on its top edge */
+  .site-footer {
+    margin-top: 90px; border-radius: var(--radius) var(--radius) 0 0; border-bottom: 0;
+    box-shadow: 0 -10px 40px -14px rgba(var(--sh),.28);
+  }
+  .site-footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 26px 0 30px; color: var(--muted); }
+  .site-footer strong { color: var(--text); font-weight: 600; }
+
+  /* Gallery lightbox */
+  /* Gallery viewer: the frame hugs the photo, with an info panel beside it */
+  .lightbox {
+    position: fixed; inset: 0; z-index: 50; display: none; place-items: center; padding: 24px; overflow: auto;
+    background: rgba(255,255,255,.45); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  }
+  .lightbox.open { display: grid; }
+  .lb-wrap { display: flex; align-items: center; gap: 18px; max-width: 100%; }
+  .lb-frame { position: relative; padding: 14px; flex: none; }
+  .lb-frame .media { width: fit-content; background: none; border-radius: 16px; }
+  .lb-frame img, .lb-frame video {
+    display: block; width: auto; height: auto; border-radius: 16px; object-fit: contain; background: none;
+    max-width: min(calc(100vw - 400px), 1200px); max-height: calc(100vh - 80px);
+  }
+  .lb-frame .ph { width: min(640px, calc(100vw - 400px)); aspect-ratio: 4/3; }
+  .lb-frame .arrow-btn { opacity: .9; }
+  .lb-frame .arrow-btn.prev { left: 24px; } .lb-frame .arrow-btn.next { right: 24px; }
+  .lb-info { width: 280px; flex: none; padding: 22px 22px 18px; position: relative; }
+  .lb-info h3 { font-size: 1.4rem; font-weight: 800; line-height: 1.15; padding-right: 34px; }
+  .lb-loc { display: flex; align-items: center; gap: 6px; margin-top: 6px; color: var(--muted); }
+  .lb-loc svg { color: var(--brand); flex: none; }
+  .lb-info .pills { margin-top: 10px; }
+  .lb-info dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(var(--ink),.12); font-size: .9rem; }
+  .lb-info dt { color: var(--muted); }
+  .lb-info dd { font-weight: 600; overflow-wrap: anywhere; }
+  .lb-info [data-field="location"]:empty { display: none; }
+  body.editing .lb-info [data-field="location"]:empty { display: inline-block; }
+  .lb-info .cat-toggles { margin-top: 10px; }
+  .lb-info .close-btn { top: 12px; right: 12px; width: 34px; height: 34px; }
+  @media (max-width: 860px) {
+    .lightbox { place-items: start center; }
+    .lb-wrap { flex-direction: column; align-items: stretch; }
+    .lb-frame img, .lb-frame video { max-width: calc(100vw - 76px); max-height: 65vh; }
+    .lb-frame .media { margin: 0 auto; }
+    .lb-frame .ph { width: calc(100vw - 76px); }
+    .lb-info { width: auto; }
+  }
+  .crop-frame video { height: 100%; pointer-events: none; }
+
+  /* ---------- Edit mode ---------- */
+  .edit-fab {
+    position: fixed; right: 16px; bottom: 16px; z-index: 45; display: flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 999px; font: inherit; font-weight: 600; color: var(--text); cursor: pointer;
+    background: rgba(255,255,255,.85);
+  }
+  .edit-fab:hover { background: #fff; }
+  .edit-bar {
+    position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 45;
+    display: none; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center;
+    padding: 8px 8px 8px 18px; border-radius: 999px; background: rgba(255,255,255,.9); max-width: calc(100% - 32px);
+  }
+  body.editing .edit-bar { display: flex; }
+  body.editing .edit-fab { display: none; }
+  .edit-status { color: var(--muted); font-size: .9rem; margin-right: 6px; }
+  .edit-bar button { border: 0; font: inherit; padding: 8px 16px; border-radius: 999px; cursor: pointer; background: #eaf3f4; color: var(--text); }
+  .edit-bar button:hover { background: #d6e9eb; }
+  .edit-bar button.primary { background: var(--teal); color: #fff; }
+
+  body.editing [contenteditable="true"], body.editing [contenteditable="plaintext-only"] {
+    outline: 1.5px dashed rgba(31,181,160,.6); outline-offset: 3px; border-radius: 6px; cursor: text;
+  }
+  body.editing [contenteditable]:focus { outline: 2px solid var(--teal); background: rgba(255,255,255,.55); }
+  body.editing [contenteditable] { user-select: text; -webkit-user-select: text; }
+  body.editing nav { cursor: default; }
+  body.editing #m-story:empty::before { content: attr(data-placeholder); opacity: .5; }
+  /* Section blurb (e.g. under the Gallery title); hidden while empty, except in Edit mode */
+  .blurb { padding: 18px 26px; margin-bottom: 22px; color: var(--muted); font-size: 1.05rem; line-height: 1.6; white-space: pre-wrap; }
+  .blurb:empty { display: none; }
+  body.editing .blurb:empty { display: block; }
+  body.editing .blurb:empty::before { content: attr(data-placeholder); opacity: .55; }
+  .cat-toggles { display: flex !important; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .cat-tog { border: 1px solid #cfe2e5; background: #fff; color: var(--muted); font: inherit; font-size: .72rem; font-weight: 500; padding: 2px 8px; border-radius: 999px; cursor: pointer; }
+  .cat-tog.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+  body.editing [data-field="location"]:empty::before { content: 'Add location'; opacity: .55; }
+  body.editing [data-field="location"]:empty { display: inline-block; min-width: 80px; }
+  body.editing .label { pointer-events: auto; }
+  body.editing .gallery figure { cursor: default; }
+  body.editing footer { padding-bottom: 70px; }
+
+  .item-tools { display: none; }
+  body.editing .item-tools { display: flex; position: absolute; top: 18px; right: 18px; gap: 4px; z-index: 6; }
+  body.editing .row > .item-tools { right: auto; left: 22px; top: 22px; }
+  body.editing .skill .item-tools { position: static; gap: 2px; }
+  .tool {
+    width: 30px; height: 30px; border-radius: 50%; border: 0; cursor: pointer; font-size: .95rem;
+    background: #fff; color: var(--text); display: grid; place-items: center;
+    box-shadow: 0 2px 10px -3px rgba(var(--sh),.4); transition: background .15s, color .15s;
+  }
+  .skill .tool { width: 22px; height: 22px; font-size: .75rem; box-shadow: none; background: #eaf3f4; }
+  .tool:hover { background: var(--teal); color: #fff; }
+  .tool.grip { cursor: grab; touch-action: none; }
+  html.dragging-item, html.dragging-item * { cursor: grabbing !important; }
+  .drag-src { opacity: .3; }
+  .drag-ghost { position: fixed; z-index: 90; pointer-events: none; margin: 0; opacity: .92; transform: rotate(1.5deg) scale(1.02); box-shadow: 0 18px 40px -12px rgba(var(--sh),.45); }
+  [data-drop="swap"] { outline: 3px solid var(--brand) !important; outline-offset: 3px; }
+  [data-drop="before-y"] { box-shadow: 0 -5px 0 0 var(--brand) !important; }
+  [data-drop="after-y"] { box-shadow: 0 5px 0 0 var(--brand) !important; }
+  [data-drop="before-x"] { box-shadow: -5px 0 0 0 var(--brand) !important; }
+  [data-drop="after-x"] { box-shadow: 5px 0 0 0 var(--brand) !important; }
+  body.editing #m-thumbs button { cursor: grab; touch-action: none; }
+  .tool.danger:hover { background: #d9534f; color: #fff; }
+  .add-btn { display: none; border: 0; font: inherit; font-weight: 600; cursor: pointer; padding: 8px 16px; border-radius: 999px; background: var(--teal); color: #fff; }
+  body.editing .add-btn { display: inline-flex; }
+  .edit-input, .links input, .pills select {
+    font: inherit; font-size: .85rem; padding: 6px 10px; border-radius: 10px; border: 1px solid #cfe2e5; background: #fff; color: var(--text); min-width: 0;
+  }
+  .links input { width: 170px; }
+  .color-edit { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; color: var(--muted); margin-top: 6px; }
+  .color-edit input { width: 30px; height: 24px; border: 0; padding: 0; background: none; cursor: pointer; }
+  .stage .color-edit { position: absolute; left: 26px; bottom: 22px; z-index: 2; background: rgba(255,255,255,.85); padding: 4px 10px; border-radius: 999px; }
+  .tags-edit { background: #fff; }
+  .photo-tools { display: none; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  body.editing .photo-tools { display: flex; }
+  .photo-tools button { border: 0; font: inherit; font-size: .85rem; padding: 6px 12px; border-radius: 999px; cursor: pointer; background: #fff; color: var(--text); }
+  .photo-tools button:hover { background: var(--teal); color: #fff; }
+  .photo-tools button.danger:hover { background: #d9534f; }
+
+  /* Trim video dialog */
+  .trim-card { width: min(720px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: 20px; display: grid; gap: 14px; background: var(--glass-strong); }
+  .trim-card h3 { font-size: 1.3rem; font-weight: 600; }
+  .trim-card video { width: 100%; max-height: 50vh; border-radius: 16px; background: #0d2a33; display: block; }
+  .trim-bar { position: relative; height: 10px; border-radius: 999px; background: rgba(var(--ink),.15); }
+  .trim-bar .keep { position: absolute; top: 0; bottom: 0; border-radius: 999px; background: var(--brand); }
+  .trim-bar .playhead { position: absolute; top: -4px; width: 3px; height: 18px; margin-left: -1px; border-radius: 2px; background: var(--text); }
+  .trim-row { display: grid; grid-template-columns: 48px 1fr 64px auto; align-items: center; gap: 10px; font-size: .92rem; color: var(--muted); }
+  .trim-row input[type=range] { width: 100%; accent-color: var(--brand); }
+  .trim-row b { color: var(--text); font-variant-numeric: tabular-nums; text-align: right; }
+  .trim-row button, .trim-actions button { border: 0; font: inherit; font-size: .85rem; padding: 6px 12px; border-radius: 999px; cursor: pointer; background: #fff; color: var(--text); white-space: nowrap; }
+  .trim-summary { font-size: .9rem; color: var(--muted); }
+  .trim-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+  .trim-actions .primary { background: var(--brand); color: #fff; }
+
+  /* Crop / adjust dialog */
+  .crop-modal { z-index: 70; }
+  .crop-card { width: min(640px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: 20px; display: grid; gap: 14px; background: var(--glass-strong); }
+  .crop-card h3 { font-size: 1.3rem; font-weight: 600; }
+  .crop-frame { margin: 0 auto; cursor: grab; touch-action: none; user-select: none; outline: 2px solid var(--teal); outline-offset: 2px; }
+  .crop-frame.dragging { cursor: grabbing; }
+  .crop-frame img { height: 100%; pointer-events: none; }
+  .crop-controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; font-size: .92rem; color: var(--muted); }
+  .crop-controls label { display: inline-flex; align-items: center; gap: 8px; }
+  .crop-controls input[type=range] { width: 180px; accent-color: var(--teal); }
+  .crop-aspects { display: flex; gap: 4px; flex-wrap: wrap; }
+  .crop-aspects button, .crop-actions button { border: 0; font: inherit; font-size: .88rem; padding: 6px 12px; border-radius: 999px; cursor: pointer; background: #fff; color: var(--text); }
+  .crop-aspects button.on { background: var(--teal); color: #fff; }
+  .crop-actions { display: flex; justify-content: flex-end; gap: 8px; }
+  .crop-actions .primary { background: var(--teal); color: #fff; }
+  .crop-hint { width: 100%; font-size: .85rem; }
+  .crop-rotate { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; width: 100%; }
+  .crop-rotate button { display: inline-flex; align-items: center; gap: 6px; border: 0; font: inherit; font-size: .88rem; padding: 6px 12px; border-radius: 999px; cursor: pointer; background: #fff; color: var(--text); }
+  .crop-rotate button:hover { background: var(--brand); color: #fff; }
+  .crop-rotate input[type=range] { width: 140px; accent-color: var(--brand); }
+  .crop-rotate b { color: var(--text); min-width: 3.2em; font-variant-numeric: tabular-nums; }
+
+  @media (max-width: 1340px) {
+    /* not enough room beside the content: arrows move down next to the dots */
+    .pager-btn { top: auto; bottom: 0; transform: none; }
+    .pager-btn.prev { left: calc(50% - 140px); }
+    .pager-btn.next { right: calc(50% - 140px); }
+  }
+  @media (max-width: 1000px) {
+    html { scroll-padding-top: 150px; }
+    header .wrap { flex-direction: column; align-items: stretch; gap: 10px; }
+    .brand-row { justify-content: space-between; }
+    .logo { align-self: flex-start; }
+    nav { overflow-x: auto; scrollbar-width: none; }
+    nav::-webkit-scrollbar { display: none; }
+  }
+  @media (max-width: 860px) {
+    .bento { grid-template-columns: 1fr 1fr; grid-auto-rows: 150px; }
+    .hero-row { grid-template-columns: 1fr; }
+    .t-feature { justify-self: stretch; }
+    .t-feature .media { width: 100%; }
+    .t-feature .media > img, .t-feature .media > video { width: 100%; max-width: none; max-height: none; }
+    .t-feature .media > .ph { width: 100%; }
+    .t-feature .media.shaped { height: auto; width: 100%; }
+    .about, .model-stage, .modal-card { grid-template-columns: 1fr; }
+    .modal-text { padding: 0 8px 8px; }
+    .row { grid-template-columns: 110px 1fr; padding-right: 18px; }
+    .row .links { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
+    .head { padding: 12px 12px 12px 20px; }
+  }
+  @media (max-width: 560px) {
+    nav { gap: 0; justify-content: space-between; padding: 5px; }
+    .nav-pill { top: 5px; bottom: 5px; }
+    nav a { padding: 8px 7px; font-size: .86rem; }
+    nav .long { display: none; }
+    .logo { font-size: 1.1rem; padding-right: 14px; }
+    .mode-switch button { padding: 6px 11px; font-size: .84rem; }
+    .t-intro { min-height: 0; }
+    .edit-bar { border-radius: 22px; }
+  }
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script src="stl-viewer.js" defer></script>
+<script src="media/sizes.js"></script>
+<script src="media/metadata.js"></script>
+</head>
+<body>
+<canvas id="portal" aria-hidden="true"></canvas>
+<div id="veil" aria-hidden="true"></div>
+
+<header>
+  <div class="wrap">
+    <div class="brand-row">
+      <a href="./" class="logo glass" id="logo"><img class="logo-icon" src="favicon-preview.png" alt=""><span data-edit="site-name">Your Name</span></a>
+      <div class="mode-switch glass" id="mode-switch" role="group" aria-label="Which portfolio">
+        <span class="knob"></span>
+        <button type="button" data-mode="non">Non-STEM</button>
+        <button type="button" data-mode="stem">STEM</button>
+      </div>
+    </div>
+    <nav class="glass" id="nav">
+      <span class="nav-pill" id="nav-pill"></span>
+      <a href="#home" data-edit="nav-home">Home</a>
+      <a href="#gallery" data-edit="nav-gallery">Gallery</a>
+      <a href="#cooking" data-edit="nav-cooking">Cooking</a>
+      <a href="#projects" data-edit="nav-projects">Coding<span class="long"> Projects</span></a>
+      <a href="#models" data-edit="nav-models">3D<span class="long"> Models</span></a>
+      <a href="#about" data-edit="nav-about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <a href="./" class="back glass" id="back">← Back to everything</a>
+
+  <!-- 1. HOME -->
+  <section id="home">
+    <div class="hero-row">
+      <div class="tile glass t-intro">
+        <h1 data-edit="hero-title">Hi! I make <span class="grad-text">all kinds of things.</span></h1>
+        <p data-edit="hero-intro">Welcome to my corner of the internet. A short intro about who you are and what you create goes here.</p>
+      </div>
+      <div class="tile glass t-feature item" data-single="feature">
+        <div class="item-tools"></div>
+        <div class="media" id="feature-media"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. GALLERY -->
+  <section id="gallery">
+    <div class="head glass">
+      <a class="head-link" href="?page=gallery"><h2 data-edit="title-gallery">Gallery</h2><span class="go">→</span></a>
+      <div class="head-right">
+        <div class="chips" id="gallery-filters"></div>
+        <button class="add-btn" data-act="add" data-list="gallery">+ Add</button>
+      </div>
+    </div>
+    <div class="blurb glass" data-edit="gallery-blurb" data-multiline data-placeholder="Write something about your gallery…"></div>
+    <div class="pager" id="gallery-pager"></div>
+  </section>
+
+  <!-- 3. COOKING -->
+  <section id="cooking">
+    <div class="head glass">
+      <a class="head-link" href="?page=cooking"><h2 data-edit="title-cooking">Cooking</h2><span class="go">→</span></a>
+      <div class="head-right">
+        <div class="chips" id="dish-filters">
+          <button class="chip on" data-f="all">All</button>
+          <button class="chip" data-f="cooking">Cooking</button>
+          <button class="chip" data-f="baking">Baking</button>
+          <button class="chip" data-f="beverages">Beverages</button>
+        </div>
+        <button class="add-btn" data-act="add" data-list="creations">+ Add</button>
+      </div>
+    </div>
+    <div class="pager" id="dish-pager"></div>
+  </section>
+
+  <!-- 4. CODING PROJECTS -->
+  <section id="projects">
+    <div class="head glass">
+      <a class="head-link" href="?page=projects"><h2 data-edit="title-projects">Coding Projects</h2><span class="go">→</span></a>
+      <div class="head-right">
+        <p data-edit="desc-projects">Things I've coded.</p>
+        <button class="add-btn" data-act="add" data-list="projects">+ Add</button>
+      </div>
+    </div>
+    <div class="pager" id="project-pager"></div>
+  </section>
+
+  <!-- 5. 3D MODELS -->
+  <section id="models">
+    <div class="head glass">
+      <a class="head-link" href="?page=models"><h2 data-edit="title-models">3D Models</h2><span class="go">→</span></a>
+      <div class="head-right">
+        <p data-edit="desc-models">Drag to spin · scroll to zoom · drop in an .stl to preview</p>
+        <button class="add-btn" data-act="add" data-list="models">+ Add</button>
+      </div>
+    </div>
+    <div class="pager" id="model-pager"></div>
+  </section>
+
+  <!-- 6. ABOUT -->
+  <section id="about">
+    <div class="head glass">
+      <h2 data-edit="title-about">About</h2>
+    </div>
+    <div class="about">
+      <div class="glass">
+        <h3 data-edit="about-title">Hey, I'm Your Name</h3>
+        <div data-edit="about-body" data-multiline>
+          <p>This is a space for longer text: your story, how you got into making things, and what you enjoy most.</p>
+          <p>Add a second paragraph with more details, favorite tools, or a fun fact.</p>
+        </div>
+      </div>
+      <div class="glass">
+        <h3 data-edit="toolbox-title">Toolbox</h3>
+        <div class="skills" id="skills"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer glass" id="footer">
+  <div class="wrap">
+    <span data-edit="footer-left"><strong>Your Name</strong> &nbsp;·&nbsp; © 2026</span>
+    <span data-edit="footer-right">Say hi: hello@example.com</span>
+  </div>
+</footer>
+
+<!-- Gallery lightbox -->
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <div class="lb-wrap" role="dialog" aria-modal="true" aria-labelledby="lb-title">
+    <div class="lb-frame glass"><div class="media" id="lb-media"></div></div>
+    <aside class="lb-info glass" id="lb-info"></aside>
+  </div>
+</div>
+
+<!-- Cooking showcase pop-up -->
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal-card glass" id="modal-card" role="dialog" aria-modal="true" aria-labelledby="m-title" data-list="creations">
+    <button class="close-btn" id="m-close" aria-label="Close"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div>
+      <div class="viewer media" id="m-viewer"></div>
+      <div class="thumbs" id="m-thumbs"></div>
+      <div class="photo-tools">
+        <button data-act="ph-add">+ Add photos</button>
+        <button data-act="ph-replace">Replace</button>
+        <button data-act="ph-crop">Crop</button>
+        <button data-act="ph-left">Move left</button>
+        <button data-act="ph-right">Move right</button>
+        <button data-act="ph-cover">Make cover</button>
+        <button data-act="ph-delete" class="danger">Remove</button>
+      </div>
+    </div>
+    <div class="modal-text">
+      <div class="pills" id="m-cat"></div>
+      <h3 id="m-title" data-field="name"></h3>
+      <div id="m-story" data-field="story" data-multiline></div>
+      <div class="links m-links" id="m-links"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Crop / adjust dialog (edit mode) -->
+<div class="modal crop-modal" id="crop" aria-hidden="true">
+  <div class="crop-card glass" role="dialog" aria-modal="true" aria-label="Adjust image">
+    <h3>Adjust image</h3>
+    <div class="crop-frame media" id="crop-frame"></div>
+    <div class="crop-controls">
+      <span class="crop-hint">Drag the image to move it. Zoom in to crop tighter.</span>
+      <label>Zoom <input type="range" id="crop-zoom" min="1" max="3" step="0.01" value="1"></label>
+      <label><input type="checkbox" id="crop-fit"> Show whole image</label>
+      <span class="crop-rotate" id="crop-rotate">
+        <button type="button" data-rot="-90" title="Rotate left" aria-label="Rotate left"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4v6h6"/><path d="M3.5 13.5A8.5 8.5 0 1 0 6 6.3L3 10"/></svg>Rotate left</button>
+        <button type="button" data-rot="90" title="Rotate right" aria-label="Rotate right"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4v6h-6"/><path d="M20.5 13.5A8.5 8.5 0 1 1 18 6.3L21 10"/></svg>Rotate right</button>
+        <label>Straighten <input type="range" id="crop-tilt" min="-15" max="15" step="0.5" value="0"> <b id="crop-tilt-val">0°</b></label>
+      </span>
+      <div class="crop-aspects" id="crop-aspects">
+        <button data-aspect="">Original</button>
+        <button data-aspect="1/1">Square</button>
+        <button data-aspect="4/3">4:3</button>
+        <button data-aspect="3/4">3:4</button>
+        <button data-aspect="16/9">16:9</button>
+      </div>
+    </div>
+    <div class="crop-actions">
+      <button data-crop="reset">Reset</button>
+      <button data-crop="cancel">Cancel</button>
+      <button data-crop="save" class="primary">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Trim video dialog (edit mode) -->
+<div class="modal crop-modal" id="trim" aria-hidden="true">
+  <div class="trim-card glass" role="dialog" aria-modal="true" aria-label="Trim video">
+    <h3>Trim video</h3>
+    <video id="trim-video" controls playsinline disablepictureinpicture controlslist="nopictureinpicture"></video>
+    <div class="trim-bar" id="trim-bar"><div class="keep"></div><div class="playhead"></div></div>
+    <div class="trim-row"><span>Start</span><input type="range" id="trim-start" min="0" step="0.05"><b id="trim-start-val"></b><button data-trim="set-start">Use current time</button></div>
+    <div class="trim-row"><span>End</span><input type="range" id="trim-end" min="0" step="0.05"><b id="trim-end-val"></b><button data-trim="set-end">Use current time</button></div>
+    <p class="trim-summary" id="trim-summary"></p>
+    <div class="trim-actions">
+      <button data-trim="preview">Play trimmed part</button>
+      <button data-trim="reset">Reset</button>
+      <button data-trim="cancel">Cancel</button>
+      <button data-trim="save" class="primary">Save</button>
+    </div>
+  </div>
+</div>
+
+<div hidden><button id="edit-toggle"></button><div id="edit-bar"><span id="edit-status"></span></div></div>
+
+<script>
+/* =========================================================
+   CONTENT: the default content of the site.
+   Edit mode saves your changes in this browser; Export gives a
+   file with everything so it can be built into this list.
+   Images can be paths ('images/x.png') or placeholder colors (a number).
+   ========================================================= */
+const placeholders = (n, hue) => Array.from({ length: n }, (_, i) => 140 + ((hue - 140 + i * 15) % 80));
+const story = 'A longer description of this creation: what it is, what inspired it, and how it turned out.';
+const GH = 'https://github.com/javabetter/';
+const dl = (file, name, size) => ({ src: `downloads/${file}`, name, size });
+const OPTICA = {
+  name: 'Optica', icon: 'images/projects/optica.png', tags: ['Java', 'Fabric', 'Minecraft mod', 'Shaders'],
+  code: GH + 'Optica', live: '',
+  download: dl('optica-v0.3.2-26.1.2.jar', 'Optica v0.3.2 26.1.2.jar', 898915),
+  summary: 'A port of the Photonics voxel raytracing engine to Minecraft 26.1.2, with support for Euphoria Patches, BSL, Photon and more, plus an optional lighting cache for lower-end GPUs.',
+};
+const vid = name => ({ src: `media/videos/${name}.mp4`, poster: `media/videos/${name}.jpg` });
+const wix = (section, n) => `media/wix/${section}/${section}-${String(n).padStart(2, '0')}.jpg`;
+const cook = n => wix('cooking-baking', n);
+
+// Built from portfolio-content.json by tools/bake-content.js
+// Built from portfolio-content.json by tools/bake-content.js
+// Built from portfolio-content.json by tools/bake-content.js
+const DEFAULT_CONTENT = {"version":11,"text":{"feature-label":"<br>","toolbox-title":"Hobbies","footer-left":"Joseph Heimbold","footer-right":"jpheimbold@gmail.com | 337-277-5489","hero-intro":"I'm glad you're here! I hope you find something interesting, and be sure to check out the photography and cooking sections, those are my favorite...","desc-models":"Projects for fun, or for robotics       Drag to spin · scroll to zoom","site-name":"Joseph Heimbold","desc-projects":"Things I've coded. I haven't yet learned how to code, so everything I do is vibe-coded. That said, I still make every creative decision myself and actually decide how I want each program to function and look.","title-cooking":"Cooking, Baking, &amp; More","about-title":"I'm Joseph, nice to meet you!","about-body":"\n          <p>I'm glad you're here! This is a showcase of a bunch of things from my life throughout high school, from photography, to things I've cooked, to coding and 3D modelling projects, and even just pictures of my life.</p><p>This is a bit of who I am. I made this website, so each UI/UX and artistic decision was made by me. I'm proud of this project, and it's made me realize how much I've done :)</p>\n        ","hero-title":"Hi! I'm Joseph, and I make all kinds of things.                <span class=\"grad-text\">Welcome to my Non-STEM Portfolio!</span>","gallery-blurb":"Welcome to my life in images. If a picture is worth a thousand words, a video must be worth a whole book series, right?\nAnyways I am proud of my photography section! All of that was composed, framed, captured, and recolored by me.\n<b><u>NONE of the media featured in the gallery was generated by, edited by, or otherwise changed by AI.</u></b>","hero-intro-stem":"I'm glad you're here! I hope you find something interesting, this is what I've been up to!","gallery-blurb-stem":"Here are a few bits of media from my time at robotics. I've been on FRC Team Convergence 3895 (formerly Ramageddon Robotics 4336) since my sophomore year! I'm now on the CAD team, and assist the CAD leader when he needs help explaining or modelling.","about-body-stem":"\n          <p>I'm glad you're here! This is a showcase of a bunch of the STEM projects from my life throughout high school, from coding and 3D modelling projects, and even just pictures of my time at robotics.</p><p>This is a bit of who I am. I made this website, so each UI/UX and artistic decision was made by me. I'm proud of this project, and it's made me realize how much I've done :)</p>\n        "},"feature":{"image":{"src":"media/uploads/home.avif","x":49.33,"y":16.87,"fit":"contain"}},"featureStem":{"image":"media/wix/life-in-pics/life-in-pics-04.jpg"},"gallery":[{"title":"Classic Car Downtown","location":"Lafayette, Louisiana","image":"media/wix/photography/photography-05.jpg","categories":["Photography"],"size":1.73},{"title":"Beach Sunset","location":"Seacrest, Florida","image":{"src":"media/videos/drone-sunset.mp4","poster":"media/videos/drone-sunset.jpg"},"categories":["Drone Shots"],"size":1.04},{"title":"Blue Jay","location":"Fort Lauderdale, Florida","image":"media/photos/img-1573.jpg","categories":["Photography"],"size":1.23},{"title":"Beach Flyover","location":"Seagrove, Florida","image":{"src":"media/videos/drone-beach-water1.mp4","poster":"media/videos/drone-beach-water1.jpg"},"categories":["Drone Shots"],"sizes":{"Drone Shots":1.39}},{"title":"Streets of Rome with Friends","location":"Rome, Italy","image":"media/photos/img-1699.jpg","categories":["Travel","Life"]},{"title":"Lighthouse Flyby","location":"Sanibel, Florida","image":{"src":"media/videos/lighthouse.mp4","poster":"media/videos/lighthouse.jpg"},"categories":["Drone Shots"],"size":1.6},{"title":"Shoreline From Above","location":"Sanibel, Florida","image":{"src":"media/videos/drone-beach-water.mp4","poster":"media/videos/drone-beach-water.jpg"},"categories":["Drone Shots"],"size":1.74},{"title":"Spiral Staircase","location":"Vatican City","image":"media/wix/photography/photography-08.jpg","categories":["Photography","Travel"],"size":1.41},{"title":"Wavy Tower","location":"Fort Lauderdale, Florida","image":"media/photos/img-1576.jpg","categories":["Photography"],"size":1.01},{"title":"Family on Mountain Trail","location":"San Vito Lo Capo, Italy","image":"media/wix/photography/photography-19.jpg","categories":["Travel","Life"],"sizes":{"Travel":1.22,"Life":1.46}},{"title":"Spire at Night","location":"Notre Dame, Indiana","image":"media/photos/img-1761.jpg","categories":["Photography"]},{"title":"Mountaintop Plants","location":"San Vito Lo Capo, Italy","image":"media/wix/photography/photography-03.jpg","categories":["Photography"],"size":1.33},{"title":"Lighthouse","location":"Jupiter, Florida","image":"media/photos/img-1583.jpg","categories":["Photography"],"size":0.84,"sizes":{"Photography":1.35}},{"title":"Idyllic Lake","location":"Belaggio, Italy","image":"media/wix/life-in-pics/life-in-pics-20.jpg","categories":["Travel","Life"],"size":1.17,"sizes":{"Travel":1.3}},{"title":"St. Peter's at Dusk","location":"Rome, Italy","image":"media/photos/img-0915.jpg","categories":["Photography","Travel"],"size":1.4,"sizes":{"Travel":1.45}},{"title":"Summit Cross","location":"San Vito Lo Capo, Italy","image":"media/wix/photography/photography-02.jpg","categories":["Photography","Travel","Drone Shots"],"sizes":{"Photography":1.15,"Travel":0.97}},{"title":"Driftwood","location":"Sawyer, Michigan","image":"media/wix/photography/photography-07.jpg","categories":["Photography"],"size":1.32},{"title":"Sweet Car!","location":"North Palm Beach, Florida","image":"media/photos/img-1578.jpg","categories":["Photography"],"size":1.28},{"title":"Abandoned Waterpark","location":"Off of I-10, Louisiana","image":{"src":"media/videos/drone-waterpark.mp4","poster":"media/videos/drone-waterpark.jpg"},"categories":["Drone Shots"],"size":1.52},{"title":"Group Photo in the Pantheon","location":"Rome, Italy","image":"media/photos/img-0766.jpg","categories":["Photography","Travel","Life"],"size":1.39,"sizes":{"Travel":0.95}},{"title":"Kayaking","location":"Dallas, Texas","image":{"src":"media/videos/aesthetic-canoe.mp4","poster":"media/videos/aesthetic-canoe.jpg"},"categories":["Life"],"size":1.52},{"title":"Birds Flying","location":"Dallas, Texas","image":{"src":"media/videos/gx010488.mp4","poster":"media/videos/gx010488.jpg"},"categories":["Life"],"sizes":{"Life":1.52},"size":1.15},{"title":"Massive Agriculture Drone (X50)","location":"Parks, Louisiana","image":{"src":"media/videos/gx010720.mp4","poster":"media/videos/gx010720.jpg"},"categories":["Life"]},{"title":"Snowy Neighborhood","location":"Lafayette, Louisiana","image":{"src":"media/videos/gx010568.mp4","poster":"media/videos/gx010568.jpg"},"categories":["Photography","Drone Shots"],"size":1.6,"sizes":{"Photography":1.45}},{"title":"Night Timelapse","location":"Off of I-10, I forgot the state...","image":{"src":"media/videos/gx010506.mp4","poster":"media/videos/gx010506.jpg"},"categories":["Photography"],"size":1.26},{"title":"Fireworks","location":"St. Martinville, Louisiana","image":{"src":"media/videos/gx010524.mp4","poster":"media/videos/gx010524.jpg"},"categories":["Life"],"sizes":{"Life":0.99}},{"title":"Snow Day","location":"Lafayette, Louisiana","image":{"src":"media/videos/gx010549.mp4","poster":"media/videos/gx010549.jpg"},"categories":["Life"],"size":1.95},{"title":"Snowy Street","location":"Lafayette, Louisiana","image":{"src":"media/videos/gx010557.mp4","poster":"media/videos/gx010557.jpg"},"categories":["Life"]},{"title":"Sledding at the Park","location":"Lafayette, Louisiana","image":{"src":"media/videos/gx010575.mp4","poster":"media/videos/gx010575.jpg"},"categories":["Life"]},{"title":"At Competition","location":"Kenner, Louisiana","image":"media/wix/life-in-pics/life-in-pics-04.jpg","categories":["Robotics"],"size":2},{"title":"1st Place in Robotics Competition at STEP","location":"West Lafayette, Indiana","image":"media/wix/life-in-pics/life-in-pics-17.jpg","categories":["Life","Robotics"],"size":1.49,"sizes":{"Life":1.13}},{"title":"Blowing in the Wind","location":"San Vito Lo Capo, Italy","image":"media/wix/photography/photography-12.jpg","categories":["Photography"],"size":1.2},{"title":"Baroque Church","location":"Italy","image":"media/wix/photography/photography-09.jpg","categories":["Travel","Drone Shots"],"size":1.61,"sizes":{"Travel":1.14,"Drone Shots":1.37}},{"title":"Boogie Boarding","location":"Florida","image":{"src":"media/videos/boogie-board.mp4","poster":"media/videos/boogie-board.jpg"},"categories":["Travel","Life"],"size":1.88},{"title":"Pantheon Interior","location":"Rome, Italy","image":"media/wix/life-in-pics/life-in-pics-23.jpg","categories":["Travel","Life"],"size":0.77,"sizes":{"Travel":0.91,"Life":0.9}},{"title":"Endless Books","location":"Notre Dame Library, Indiana","image":"media/photos/img-1995.jpg","categories":["Photography"],"sizes":{"Photography":1.03}},{"title":"Close-up of Pope Leo XIV","location":"Vatican City","image":"media/photos/img-0975.jpg","categories":["Photography","Travel"],"size":2,"sizes":{"Photography":2,"Travel":2}},{"title":"Photogenic Squirrel ¯\\_(ツ)_/¯","location":"College Station, Texas","image":"media/wix/photography/photography-06.jpg","categories":["Photography"],"size":1.35},{"title":"Tower in the Fog","location":"Chicago, Illinois","image":"media/photos/img-1883.jpg","categories":["Photography"],"sizes":{"Photography":1.12}},{"title":"Ancient View","location":"Matera, Italy","image":"media/wix/photography/photography-16.jpg","categories":["Travel","Drone Shots"],"size":1.26,"sizes":{"Travel":1.02}},{"title":"Godzilla Robot, 2025 Season","location":"Kenner, Louisiana","image":"media/wix/photography/photography-14.jpg","categories":["Robotics"],"size":1},{"title":"Sea Grotto","location":"Scopello, Italy","image":"media/wix/photography/photography-23.jpg","categories":["Photography","Travel"],"size":1.15,"sizes":{"Photography":1.5,"Travel":1.8}},{"title":"He's got some tall legs","location":"Florida","image":"media/wix/photography/photography-15.jpg","categories":["Photography"],"size":1.53},{"title":"Scenic Cliff","location":"San Vito Lo Capo, Italy","image":"media/wix/photography/photography-04.jpg","categories":["Photography","Travel","Drone Shots"],"size":1.13,"sizes":{"Photography":2,"Travel":2}},{"title":"Swimming","location":"Scopello, Italy","image":"media/wix/photography/photography-17.jpg","categories":["Life"],"size":1.04},{"title":"Uh oh... (I fixed it later!)","location":"Lafayette, Louisiana","image":{"src":"media/videos/drone-in-pool.mp4","poster":"media/videos/drone-in-pool.jpg"},"categories":["Drone Shots"],"size":2,"sizes":{"Drone Shots":1.6}},{"title":"Old Stone Bridge","location":"Italy","image":"media/wix/photography/photography-13.jpg","categories":["Travel","Drone Shots"],"size":1.3,"sizes":{"Travel":1.79,"Drone Shots":1.07}},{"title":"Lizard","location":"Italy","image":"media/wix/photography/photography-20.jpg","categories":["Photography"],"size":1.28,"sizes":{"Photography":1.28}},{"title":"River Towers","location":"Fort Lauderdale, Florida","image":"media/wix/photography/photography-21.jpg","categories":["Photography"],"sizes":{"Photography":1.51}},{"title":"Sicilian Coast","location":"Scopello, Italy","image":"media/wix/photography/photography-22.jpg","categories":["Travel","Drone Shots"],"size":1.63,"sizes":{"Drone Shots":1.25}},{"title":"Underwater","location":"Scopello, Italy","image":"media/wix/photography/photography-11.jpg","categories":["Photography"],"size":1.35,"sizes":{"Photography":1.35}},{"title":"Vineyard and Complex","location":"Italy","image":"media/wix/photography/photography-18.jpg","categories":["Travel","Drone Shots"],"sizes":{"Travel":1.02,"Drone Shots":1.53}},{"title":"Heron on the Pond","location":"Lafayette, Louisiana","image":"media/wix/photography/photography-10.jpg","categories":["Photography"],"sizes":{"Photography":2}},{"title":"Visiting GT","location":"Atlanta, Georgia","image":"media/wix/life-in-pics/life-in-pics-01.jpg","categories":["Life"]},{"title":"Drone in a Aero Research Facility","location":"Bryan, Texas","image":"media/wix/life-in-pics/life-in-pics-02.jpg","categories":["Life"],"size":1.3},{"title":"Post-Competition Photo","location":"Kenner, Louisiana","image":"media/wix/life-in-pics/life-in-pics-03.jpg","categories":["Robotics"],"size":1.32},{"title":"Magnolia Regional Competition","location":"Kenner, Louisiana","image":{"src":"media/videos/gx010690.mp4","poster":"media/videos/gx010690.jpg"},"categories":["Robotics"],"size":1.27},{"title":"Cockpit Selfie","location":"Peru, Indiana","image":"media/wix/life-in-pics/life-in-pics-05.jpg","categories":["Life"],"size":1.32},{"title":"In the Cockpit","location":"Peru, Indiana","image":"media/wix/life-in-pics/life-in-pics-06.jpg","categories":["Life"]},{"title":"Homecoming Float","location":"Lafayette, Louisiana","image":"media/wix/life-in-pics/life-in-pics-08.jpg","categories":["Life"],"size":1.58},{"title":"Airfield","location":"Peru, Indiana","image":"media/wix/life-in-pics/life-in-pics-09.jpg","categories":["Life"],"size":1.27,"sizes":{"Life":1.67}},{"title":"Inside the Cockpit","location":"College Station, Texas","image":"media/wix/life-in-pics/life-in-pics-10.jpg","categories":["Life"]},{"title":"Camp Awards with New Friends","location":"Notre Dame, Indiana","image":"media/wix/life-in-pics/life-in-pics-12.jpg","categories":["Life"],"size":1.48},{"title":"HOCO Parade Day","location":"Lafayette, Louisiana","image":"media/wix/life-in-pics/life-in-pics-13.jpg","categories":["Life"]},{"title":"Cross Country Meet","location":"Louisiana","image":"media/wix/life-in-pics/life-in-pics-14.jpg","categories":["Life"]},{"title":"Varsity Boys XC Victory","location":"Louisiana","image":"media/wix/life-in-pics/life-in-pics-15.jpg","categories":["Life"]},{"title":"Robot Practice","location":"Lafayette, Louisiana","image":{"src":"media/videos/gx010631.mp4","poster":"media/videos/gx010631.jpg"},"categories":["Robotics"],"size":1.31},{"title":"Scavenger Hunt","location":"West Lafayette, Indiana","image":"media/wix/life-in-pics/life-in-pics-18.jpg","categories":["Life"],"sizes":{"Life":1.4}},{"title":"St. Peter's Selfie","location":"Vatican City","image":"media/wix/life-in-pics/life-in-pics-24.jpg","categories":["Travel","Life"],"size":1.59,"sizes":{"Travel":1.93}},{"title":"3rd Place Speech and Debate Tournament, Public Forum","location":"Youngsville, Louisiana","image":"media/wix/life-in-pics/life-in-pics-21.jpg","categories":["Life"],"size":1,"sizes":{"Life":1.35}},{"title":"Sea Stacks","location":"Scopello, Italy","image":"media/wix/photography/photography-01.jpg","categories":["Photography","Travel","Drone Shots"],"size":2,"sizes":{"Photography":2,"Travel":1.45}}],"creations":[{"name":"Beef Wellington","cat":"cooking","photos":[{"src":"media/wix/cooking-baking/cooking-baking-09.jpg","fit":"contain"},"media/wix/cooking-baking/cooking-baking-11.jpg","media/wix/cooking-baking/cooking-baking-05.jpg","media/wix/cooking-baking/cooking-baking-06.jpg","media/wix/cooking-baking/cooking-baking-07.jpg","media/wix/cooking-baking/cooking-baking-08.jpg","media/wix/cooking-baking/cooking-baking-10.jpg"],"summary":"Beef tenderloin wrapped in pastry and mushroom and baked to perfection.","story":"This was my longest and most difficult cooking project to date, but also one of the tastiest.\n\nFrom wrapping the tenderloin to brushing the pastry in egg wash, the entire process took three days and many hours."},{"name":"Yule Log","cat":"baking","photos":[{"src":"media/wix/cooking-baking/cooking-baking-02.jpg","fit":"contain"},"media/wix/cooking-baking/cooking-baking-03.jpg",{"src":"media/wix/cooking-baking/cooking-baking-01.jpg","fit":"contain"},"media/wix/cooking-baking/cooking-baking-04.jpg","media/uploads/yule-log-5.webp"],"summary":"A rolled sponge cake with meringue \"mushrooms\", ganache, buttercream, and chocolate cookie \"dirt\".","story":"This careful attempt at my favorite dessert is my best one. I made it to celebrate Christmas while my grandma was visiting.\n\nA sponge cake rolled in butterscotch-espresso buttercream and covered in a rich chocolate ganache. Topped with meringue cookies shaped like mushrooms and shaved dark chocolate. The \"forest dirt floor\" was made with crushed oreo cookies and other bits, then baked in the oven to crisp it up. Mouthwatering, right?"},{"name":"Tacos Al Carbon Meal","cat":"cooking","photos":["media/uploads/tacos-al-carbon-meal-1.jpg","media/uploads/tacos-al-carbon-meal-2.jpg","media/uploads/tacos-al-carbon-meal-3.jpg","media/uploads/tacos-al-carbon-meal-4.webp","media/uploads/tacos-al-carbon-meal-5.webp","media/uploads/tacos-al-carbon-meal-6.jpg"],"summary":"Grilled steak tacos marinaded to perfection, with all the toppings you could want on a street taco.","story":"I cooked this feast for my family one night. Everything about it was as good as I could do; no shortcuts. I even made the tortilla chips myself (if you've never had homemade tortilla chips, they are phenomenal)!\n\nThis meal had steak tacos al carbon, with chunky and spicy salsas, a homemade devil salsa for my dad (extra spicy), freshly fried tortilla chips, seared scallions, and other toppics."},{"name":"Summer Sling","cat":"beverages","photos":["media/uploads/summer-sling-1.webp","media/uploads/summer-sling-2.webp","media/uploads/summer-sling-3.webp","media/uploads/summer-sling-4.webp"],"summary":"A cherry and passion fruit sparkling cocktail. (Don't worry, when I make anything with alcohol, it's for my dad! If I make something for myself it's virgin)","story":"The first picture is a refreshing, end of summer drink inspired by a Singapore Sling. I was originally planning on making a Singapore Sling for my dad, but we didn't have any pineapple. I ended up subbing passion fruit puree for pineapple juice and adding a bit of maraschino cherry syrup. This is now one of my dad's favorite cocktails!\n\nThe other pictures are times when I made other drinks for my dad and grandma, with one showing me in the process of making one."},{"name":"Orange Olive Oil Cake","cat":"baking","photos":["media/uploads/orange-olive-oil-cake-1.webp"],"summary":"A smooth Italian cake with notes of orange an olive oil. Topped with cracked caramelized sugar.","story":"This is my parent's favorite dessert I make. The secret to this light and smooth cake is using olive oil for fat instead of butter, and whipping whole eggs instead of just whites or yolks.\n\nThis treat is a cake made with olive oil, with orange zest and a splash of juice to give its subtle orange flavor without overwhelming the olive oil."},{"name":"Japanese Family Dinner","cat":"cooking","photos":["media/uploads/japanese-family-dinner-1.webp","media/uploads/japanese-family-dinner-2.webp","media/uploads/japanese-family-dinner-3.webp","media/uploads/japanese-family-dinner-4.webp"],"summary":"Beek negimaki, vegetable rolls, cucumber salad, and Asian BBQ-filled onigiri, this meal was fantastic.","story":"Japanese food is my favorite cuisine. One night I was feeling inspired, so I made a feast for my family.\n\nHere you can see onigiri (the rice ball triangle) topped with sliced cucumber and filled with sauce, negimaki (the steak rolls with green onions), vegetable rolls, cucumber salad, and a dollop of my homemade Asian BBQ sauce."},{"name":"Soyaki Chicken","cat":"cooking","photos":["media/uploads/soyaki-chicken-1.webp"],"summary":"Marinaded chicken smothered and cooked in a blend of soy and teriyaki sauce.","story":"This was just a quick weeknight meal for my family, but boy did it turn out well. Inspired by my mom's Asian Cashew Chicken recipe (❤️ you Mom).\n\nChicken marinaded in a blend of soy and teriyaki sauce, served with green onions and roasted cashews over rice."},{"name":"Soft Pretzels","cat":"baking","photos":["media/uploads/soft-pretzels-1.webp","media/uploads/soft-pretzels-2.jpg","media/uploads/soft-pretzels-3.jpg"],"summary":"Homemade soft pretzels. I made two batches of these chewy delights: one with sea salt, and one with cinnamon brown sugar.","story":"I made this batch of soft German pretzels with my neighbor. I am a fiend for German food, and I promise these pretzels do not disappoint.\n\nThere are two images of the finished result: the first one is regular savory pretzels with sea salt, and the second is my sweet twist topped with cinnamon brown sugar."},{"name":"Avocado Rolls","cat":"cooking","photos":["media/uploads/avocado-rolls-1.webp","media/uploads/avocado-rolls-2.webp"],"summary":"A batch of homemade avocado rolls, my favorite kind of sushi.","story":"While I don't like fish, I ironically love sushi. Every time I have sushi, I end up getting avocado rolls or cucumber rolls, hence the avocado rolls here.\n\nSince sushi is expensive, even without fish, I've made it plenty of times at home as a snack. I even make the sushi rice myself from scratch."},{"name":"Chocolate Macarons","cat":"baking","photos":["media/uploads/chocolate-macarons-1.webp","media/uploads/chocolate-macarons-2.jpg","media/uploads/chocolate-macarons-3.webp","media/uploads/chocolate-macarons-4.webp"],"summary":"These rich chocolate macarons are perfect and rich, from the cream filling to the light cookie.","story":"Macarons (not to be confused with macaroons, a kind of almond coconut cookie) are absolutely delicious, but not easy to pull off. Seeing how much macarons cost at a bakery, I began baking them for myself.\n\nThe rightmost picture is me enjoying the final product after changing my shirt, since I spilled chocolate creme on it while I was piping the filling."},{"name":"Fresh Homemade Cannoli","cat":"baking","photos":["media/uploads/fresh-homemade-cannoli-1.jpg","media/uploads/fresh-homemade-cannoli-2.webp","media/uploads/fresh-homemade-cannoli-3.webp","media/uploads/fresh-homemade-cannoli-4.jpg","media/uploads/fresh-homemade-cannoli-5.jpg","media/uploads/fresh-homemade-cannoli-6.jpg","media/uploads/fresh-homemade-cannoli-7.webp","media/uploads/fresh-homemade-cannoli-8.webp"],"summary":"An Italian classic, ricotta cream filling in a crispy shell, which I dipped in chopped chocolate.","story":"I'm half Italian on both sides, so I eat loads of Italian food at home. But Sicilian classic I've never had at home is cannoli, until I made it myself. My dad and brother helped out on this one, and it turned out fantastic. We made everything from scratch, from the ricotta for the filling to the rolled shells."},{"name":"Four Cheese Baked Pasta","cat":"cooking","photos":["media/uploads/four-cheese-baked-pasta-1.jpg"],"summary":"A baked penne dish with heavy cream, a mix of whatever cheeses I have in the fridge, dusted with breadcrumbs.","story":"This is one of my favorite winter comfort dishes. It's creamy, crispy, and very filling. Best of all, it's super easy and fast to make, with little cleanup!"}],"projects":[{"name":"Optica","icon":"images/projects/optica.png","tags":["Java","Fabric","Minecraft mod","Shaders"],"code":"https://github.com/javabetter/Optica","live":"","download":{"src":"downloads/optica-v0.3.2-26.1.2.jar","name":"Optica v0.3.2 26.1.2.jar","size":898915},"summary":"My proudest and most complicated project! This is a fork of Photonics (latest release https://modrinth.com/mod/photonics, but this is forked from an alpha release), a software raytracing engine for Minecraft. It ports the mod from Minecraft 1.21.11 to 26.1.2, which involved nearly a full re-write. I also added configurable performance features, including a LOD system, aggressive culling, light source grouping, cached lighting, and more."},{"name":"Shiny Hunter","icon":"images/projects/shiny-hunter.png","tags":["Java","Fabric","Minecraft mod"],"code":"https://github.com/javabetter/ShinyHunter","live":"","summary":"A Minecraft mod for Hypixel Skyblock to improve the quality of life for the Critter Safari: it helps you spot and keep track of sparkling critters, as well as dozens of other useful features. Some of the features are so useful that a developer of a similar mod (with my permission) implemented the code into his own mod (https://github.com/johnceoskyblock/sparkling-mutuals)!","download":{"src":"downloads/shinyhunter-v2.21-26.1.2.jar","name":"ShinyHunter v2.21 26.1.2.jar","size":943047}},{"name":"The Weather Calculator","icon":"media/uploads/project-the-weather-calculator.png","tags":["Python","MakeCode Arcade","Calculator"],"code":"","live":"https://arcade.makecode.com/S38976-05864-54822-61397","summary":"While taking AP CSP, I learned some Python. This coding project was for the AP Exam, and I coded it entirely myself without AI! It's a simple weather calculator, with fun scenes and music I created. It uses Microsoft's MakeCode Arcade libraries and interface."},{"name":"Server Packs+","icon":"images/projects/server-packs-plus.png","tags":["Java","Fabric","Minecraft mod"],"code":"https://github.com/javabetter/Server-Packs","live":"","summary":"Prevents servers from forcing resource packs on you. Allows you to reject a resource pack but still join the server, as well as other features like caching server packs or converting them into regular resource packs.","download":{"src":"downloads/serverpacksplus-v1.1-26.1.2.jar","name":"ServerPacks+ v1.1 26.1.2.jar","size":135852}},{"name":"Simple Scale","icon":"images/projects/simple-scale.png","tags":["Java","Fabric","Minecraft mod"],"code":"","live":"","summary":"A resolution scaling mod that renders the game at a lower resolution for better performance, while keeping nametags, map art, and the GUI rendered at full quality for better readability. This is a fork of RenderScale (https://modrinth.com/mod/renderscale) that added the option to keep the aforementioned game aspects at full resolution.","download":{"src":"downloads/simplescale-v1.0-26.1.2.jar","name":"SimpleScale v1.0 26.1.2.jar","size":121802}},{"name":"Luminance","icon":"images/projects/luminance.png","tags":["Java","Fabric","Minecraft mod","Shaders"],"code":"","live":"","summary":"This is a shader testing, benchmarking, and utility mod. The main feature this provides is the ability to create custom tonemaps and import real camera LUTs, then inject it into your favorite shader.","download":{"src":"downloads/luminance-v1.0-26.1.2.jar","name":"Luminance v1.0 26.1.2.jar","size":234183}},{"name":"Citation Generator","icon":"images/projects/citation-generator.svg","tags":["HTML","JavaScript","Web"],"code":"https://github.com/javabetter/jpgcapstonebib","live":"https://jpgcapstonebib.vercel.app","summary":"This was a quick website I made to help out my class and save time. Every senior at my school has to do a research project. The problem is that it requires a specific citation format that isn't in any citation and formatting websites. So I made this to create a citation in the proper format using a URL."},{"name":"PerfScope","icon":200,"tags":["Java","Fabric","Minecraft mod"],"code":"","live":"","summary":"A performance profiling mod to give a detailed look at what takes up the most computing power. I had a friend try it out, and using the information the mod gave I was able to tweak his game and computer to double his framerate from 30 to 60.","download":{"src":"downloads/perfscope-v1.1.0-26.1.2.jar","name":"PerfScope v1.1.0 26.1.2.jar","size":125336}},{"name":"Litematica Biomes","icon":"images/projects/litematica-biomes.png","tags":["Java","Fabric","Minecraft mod"],"code":"","live":"","summary":"A companion mod for Litematica that allows custom biome information to be captured when saving an area as a schematic. Biomes are automatically applied when pasting schematics.","download":{"src":"downloads/litematicabiomes-v1.0-26.1.2.jar","name":"LitematicaBiomes v1.0 26.1.2.jar","size":37100}},{"name":"This Website","icon":185,"tags":["HTML","CSS","JavaScript","three.js"],"code":"","live":"","summary":"You're looking at it!"}],"models":[{"name":"GoPro Carrying Case Organizer","summary":"This was a total of over 20 hours of modelling and refining. It's an organizer to go in my GoPro case that keeps everything tidy.","stl":"models/gopro-carrying-case-organizer.stl","color":"#cb6a3a","rim":"#2b7fd4"},{"name":"iPhone and AirPods Dock","summary":"This was a Christmas present for my Dad to hold and charge his phone and earbuds in his office, while holding the cables","stl":"models/iphone-and-airpods-dock.stl","color":"#f8a93a","rim":"#3ccf7a"},{"name":"Robot Cart","summary":"A mock-up of a new robot cart for my team. Originally designed by team 5010, I modified the top and front to better fit my team's needs.","stl":"models/robot-cart.stl","color":"#ffe438","rim":"#3fc8db"},{"name":"Robot Signal Light Mount","summary":"A mount to hold the RSL for our 2026 season's bot, Stormbringer","stl":"models/robot-signal-light-mount.stl","color":"#ff3300","rim":"#2b7fd4"}],"skills":[{"name":"Cooking"},{"name":"3D modeling"},{"name":"Coding"},{"name":"Travelling"},{"name":"3D printing"},{"name":"Photography"},{"name":"Drones"}]};
+
+const PER_PAGE = { gallery: 12, creations: 4, projects: 3, models: 4 };
+const CATS = ['cooking', 'baking', 'beverages'];
+
+let C = structuredClone(DEFAULT_CONTENT);
+let editing = false;
+
+/* =========================================================
+   Falling End-portal squares
+   ========================================================= */
+(() => {
+  const canvas = document.getElementById('portal');
+  const footer = document.getElementById('footer');
+  const ctx = canvas.getContext('2d');
+  const PALETTES = {
+    non:  ['#2b7fd4', '#3fc8db', '#1fb5a0', '#3ccf7a', '#7fe0c0', '#5aa9e6'],
+    stem: ['#e8642c', '#f59e3b', '#e4502f', '#f2b33d', '#ffc98a', '#f07a5a'],
+  };
+  const RGB = { non: PALETTES.non.map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16))) };
+  RGB.stem = PALETTES.stem.map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)));
+  const colors = PALETTES.non;                      // (for the count)
+  let mix = document.documentElement.classList.contains('stem') ? 1 : 0;   // 0 = Non-STEM colors, 1 = STEM
+  let blended = [];
+  const blend = () => (blended = RGB.non.map((c, ci) => 'rgb(' + c.map((v, k) => Math.round(v + (RGB.stem[ci][k] - v) * mix)).join(',') + ')'));
+  blend();
+  const colorAt = ci => blended[ci];
+  const recolor = () => { blend(); for (const q of squares) q.c = blended[q.ci]; };
+  let glide = 0;
+  window.setPortalColors = (stem, ms = 0) => {
+    const from = mix, to = stem ? 1 : 0, t0 = performance.now();
+    cancelAnimationFrame(glide);
+    if (!ms) { mix = to; return recolor(); }
+    const step = now => {
+      const t = Math.min(1, (now - t0) / ms), e = t < .5 ? 2 * t * t : 1 - (2 - 2 * t) ** 2 / 2;
+      mix = from + (to - from) * e;
+      recolor();
+      if (t < 1) glide = requestAnimationFrame(step);
+    };
+    glide = requestAnimationFrame(step);
+  };
+  const motion = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1;
+  const DENSITY = 7500;      // page px² per square
+  const POP_TIME = 0.5;      // seconds
+  const FALLING = 0, POPPING = 1;
+  const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+
+  let W = 0, H = 0, pageH = 0, floor = 0, buffer = 0, canvasH = 0, canvasTop = -1, target = 0;
+  let squares = [], prevFloor = 0;
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  // Size = depth: small squares are far away, big ones are close. A square keeps
+  // its size forever, and the list stays sorted small → big so big ones draw on top.
+  function spawn(q, y) {
+    const s = q.s ?? rand(8, 34);
+    const depth = (s - 8) / 26;
+    q.s = s;
+    q.baseX = rand(-s, W);
+    q.x = q.baseX;
+    q.y = y;
+    q.vy = 24 + depth * 42 + rand(-4, 4);
+    q.ci = (Math.random() * colors.length) | 0;
+    q.c = colorAt(q.ci);
+    q.phase = rand(0, Math.PI * 2);
+    q.amp = rand(3, 12);
+    q.freq = rand(0.25, 0.6);
+    q.state = FALLING;
+    q.t = 0;
+    q.spin = rand(0, Math.PI);
+    return q;
+  }
+
+  function measure() {
+    canvas.style.height = '0px';            // collapse first so it never props the page open
+    canvas.style.transform = 'none';
+    const newW = document.documentElement.clientWidth;
+    H = window.innerHeight;
+    pageH = document.documentElement.scrollHeight;
+    floor = footer.getBoundingClientRect().top + window.scrollY;
+    buffer = Math.round(H * 0.6);
+    canvasH = Math.min(pageH, H + buffer * 2);
+    canvas.width = Math.round(newW * DPR);
+    canvas.height = Math.round(canvasH * DPR);
+    canvas.style.width = newW + 'px';
+    canvas.style.height = canvasH + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    canvasTop = -1;
+
+    if (newW !== W) { W = newW; squares = []; prevFloor = 0; }
+    target = Math.min(1800, Math.round((W * floor) / DENSITY));
+    // Keep the density the same when the page changes length:
+    // shorter page -> drop the squares that are now below the floor;
+    // longer page  -> add squares only in the newly added stretch.
+    squares = squares.filter(q => q.y + q.s <= floor);
+    const from = prevFloor > 0 && prevFloor < floor ? prevFloor : -200;
+    while (squares.length < target) squares.push(spawn({}, rand(from, floor)));
+    prevFloor = floor;
+    squares.sort((a, b) => a.s - b.s);
+  }
+
+  function step(dt) {
+    for (let i = squares.length - 1; i >= 0; i--) {
+      const q = squares[i];
+      if (q.state === FALLING) {
+        q.y += q.vy * dt * motion;
+        q.phase += q.freq * dt * motion;
+        q.x = q.baseX + Math.sin(q.phase) * q.amp;
+        if (q.y + q.s >= floor) {            // hit the footer: pop!
+          q.state = POPPING;
+          q.t = 0;
+          q.y = floor - q.s;
+        }
+      } else {
+        q.t += (dt / POP_TIME) * (motion || 1);
+        if (q.t >= 1) {
+          if (squares.length > target) squares.splice(i, 1);
+          else spawn(q, rand(-260, -q.s));   // back to the top of the page
+        }
+      }
+    }
+  }
+
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
+    else ctx.rect(x, y, w, h);
+  }
+
+  function drawPop(q, y) {
+    const t = q.t, s = q.s;
+    const cx = q.x + s / 2, cy = y + s / 2;
+    if (t < 0.18) {                          // squash against the floor
+      const k = t / 0.18;
+      const w = s * (1 + 0.35 * k), h = s * (1 - 0.35 * k);
+      ctx.fillStyle = q.c;
+      rr(cx - w / 2, y + s - h, w, h, s * 0.28);
+      ctx.fill();
+      return;
+    }
+    const k = (t - 0.18) / 0.82;
+    const ease = 1 - Math.pow(1 - k, 3);
+    ctx.globalAlpha = 1 - k;
+    const rs = s * (1 + 1.1 * ease);         // expanding ring
+    ctx.strokeStyle = q.c;
+    ctx.lineWidth = Math.max(0.6, 2.6 * (1 - k));
+    rr(cx - rs / 2, cy - rs / 2, rs, rs, rs * 0.3);
+    ctx.stroke();
+    ctx.fillStyle = q.c;                     // droplets spraying upward
+    for (let j = 0; j < 6; j++) {
+      const a = -Math.PI * (0.08 + 0.84 * (j / 5)) + Math.sin(q.spin + j) * 0.12;
+      const d = s * (0.55 + 1.25 * ease);
+      const ds = s * 0.2 * (1 - k * 0.7);
+      rr(cx + Math.cos(a) * d - ds / 2, cy + Math.sin(a) * d - ds / 2 + s * 0.9 * k * k, ds, ds, ds * 0.3);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function draw() {
+    const top = Math.max(0, Math.min(pageH - canvasH, Math.round(window.scrollY - buffer)));
+    if (top !== canvasTop) {
+      canvasTop = top;
+      canvas.style.transform = `translateY(${top}px)`;
+    }
+    ctx.clearRect(0, 0, W, canvasH);
+    for (const q of squares) {
+      const y = q.y - canvasTop;
+      if (y > canvasH + q.s || y < -q.s * 3) continue;
+      if (q.state === POPPING) { drawPop(q, y); continue; }
+      ctx.fillStyle = q.c;
+      rr(q.x, y, q.s, q.s, q.s * 0.28);
+      ctx.fill();
+    }
+  }
+
+  let last = performance.now(), dirty = true;
+  function frame(now) {
+    if (dirty) { measure(); dirty = false; }
+    step(Math.min((now - last) / 1000, 0.05));
+    last = now;
+    draw();
+    requestAnimationFrame(frame);
+  }
+  const markDirty = () => (dirty = true);
+  window.addEventListener('resize', markDirty);
+  new ResizeObserver(markDirty).observe(document.querySelector('main'));
+  requestAnimationFrame(frame);
+})();
+
+/* =========================================================
+   Helpers
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const svg = d => `<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const chevronL = svg('<path d="m15 6-6 6 6 6"/>');
+const chevronR = svg('<path d="m9 6 6 6-6 6"/>');
+const cameraIcon = svg('<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>');
+const imageIcon = svg('<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9.5" cy="9.5" r="1.5"/><path d="m20 15-4-4-8 9"/>');
+const uploadIcon = svg('<path d="M12 16V4M7 9l5-5 5 5M5 20h14"/>');
+const downloadIcon = svg('<path d="M12 4v12M7 11l5 5 5-5M5 20h14"/>');
+const clipIcon = svg('<path d="m21 12-8.5 8.5a5 5 0 0 1-7-7L14 5a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4L15.5 8"/>');
+const fmtSize = b => b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+const xIcon = svg('<path d="M6 6l12 12M18 6 6 18"/>');
+const gripIcon = '<svg class="i" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
+const cropIcon = svg('<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>');
+const icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>';
+const codeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>';
+// An image is a path/data URL string, a placeholder color (number), or a cropped
+// image: { src, x, y, zoom, fit, aspect } (x/y = focus point in %, fit = cover|contain).
+const isImg = p => typeof p === 'string' || (p && typeof p === 'object');
+const srcOf = p => (p && typeof p === 'object' ? p.src : p);
+const cropStyle = p => {
+  if (typeof p !== 'object') return '';
+  const x = p.x ?? 50, y = p.y ?? 50;
+  return `object-fit:${p.fit || 'contain'};object-position:${x}% ${y}%;transform:scale(${p.zoom ?? 1});transform-origin:${x}% ${y}%`;
+};
+// Videos are the same shape: a path or { src, poster, ... }
+const isVideo = p => isImg(p) && /\.(mp4|webm|mov|m4v)(\?|#|$)|^data:video\//i.test(srcOf(p));
+const posterOf = p => (p && typeof p === 'object' && p.poster) || '';
+/* Memory savers:
+   - thumb: use the small copy from media/thumbs (made by tools/make-thumbs.js)
+   - lazy:  write data-src instead of src; pagers load images only for the pages near
+            the one being shown, and only while the section is near the screen.
+   Known images also get width/height so their space is reserved before they load. */
+const MEDIA = window.MEDIA || {};
+const imgSrc = (src, thumb) => (thumb && MEDIA[src]?.thumb) || src;
+const sizeAttrs = src => MEDIA[src] ? ` width="${MEDIA[src].size[0]}" height="${MEDIA[src].size[1]}"` : '';
+const media = (p, ic = icon, { thumb = false, lazy = false } = {}) => {
+  if (String(srcOf(p)).startsWith('data:')) lazy = false;   // uploads / rotated copies are already in memory
+  const s = lazy ? 'data-src' : 'src';
+  if (isVideo(p)) {
+    const poster = posterOf(p);
+    return `<video disablepictureinpicture controlslist="nopictureinpicture" src="${esc(srcOf(p))}"${poster ? ` ${lazy ? 'data-poster' : 'poster'}="${esc(imgSrc(poster, thumb))}"` : ''} muted loop playsinline preload="${poster ? 'none' : 'metadata'}"${trimAttrs(p)} style="${cropStyle(p)}"></video>`;
+  }
+  return isImg(p)
+    ? `<img ${s}="${esc(imgSrc(srcOf(p), thumb))}"${sizeAttrs(srcOf(p))} alt="" style="${cropStyle(p)}">`
+    : `<div class="ph" style="--h:${+p || 180}">${ic}</div>`;
+};
+const THUMB_LAZY = { thumb: true, lazy: true };
+
+// Each lazy image loads when it comes within ~800px of the screen and lets go of its
+// memory once it's far away again (hidden pages and sections count as far away).
+function hydrateEl(el) {
+  if (el.dataset.src) { el.src = el.dataset.src; el.removeAttribute('data-src'); }
+  if (el.dataset.poster) { el.poster = el.dataset.poster; el.removeAttribute('data-poster'); }
+}
+function dehydrateEl(el) {
+  if (el.tagName === 'IMG') {
+    const s = el.getAttribute('src');
+    if (!s || s.startsWith('data:')) return;      // uploaded in Edit mode: already in memory
+    el.dataset.src = s; el.removeAttribute('src');
+  } else if (el.tagName === 'VIDEO') {
+    if (!el.paused) el.pause();
+    const p = el.getAttribute('poster');
+    if (p) { el.dataset.poster = p; el.removeAttribute('poster'); }
+    if (el.readyState > 0 && !el.src.startsWith('data:')) { const s = el.getAttribute('src'); el.removeAttribute('src'); el.load(); el.setAttribute('src', s); }
+  }
+}
+const nearIO = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && hydrateEl(e.target)), { rootMargin: '800px' });
+const farIO = new IntersectionObserver(es => es.forEach(e => !e.isIntersecting && dehydrateEl(e.target)), { rootMargin: '2400px' });
+const lazyEls = root => root.querySelectorAll('img[data-src], video[data-poster], video[poster]');
+function watchLazy(root) { lazyEls(root).forEach(el => { nearIO.observe(el); farIO.observe(el); }); }
+function unwatchLazy(root) { root.querySelectorAll('img, video').forEach(el => { nearIO.unobserve(el); farIO.unobserve(el); }); }
+// Trimmed videos ({ src, start, end } in seconds) only ever play between start and end
+const trimAttrs = p => (p && typeof p === 'object' && (p.start || p.end))
+  ? (p.start ? ` data-start="${+p.start}"` : '') + (p.end ? ` data-end="${+p.end}"` : '') : '';
+const fmtTime = t => `${Math.floor(t / 60)}:${(t % 60).toFixed(1).padStart(4, '0')}`;
+function enforceTrim(e) {
+  const v = e.target;
+  if (!(v instanceof HTMLVideoElement) || !(v.dataset.start || v.dataset.end)) return;
+  const start = +v.dataset.start || 0, end = +v.dataset.end || Infinity;
+  if (e.type === 'loadedmetadata' || v.currentTime < start - 0.05) v.currentTime = start;
+  else if (v.currentTime >= end) {
+    if (v.loop) { v.currentTime = start; v.play().catch(() => {}); }   // previews loop the trimmed part
+    else { v.pause(); v.currentTime = end; }
+  }
+}
+['loadedmetadata', 'timeupdate', 'seeked'].forEach(t => document.addEventListener(t, enforceTrim, true));
+const scissorsIcon = svg('<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>');
+const playIcon = '<svg class="i" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
+const cropTool = () => tool('crop', cropIcon, 'Crop / adjust');
+const label = cat => cat[0].toUpperCase() + cat.slice(1);
+const paragraphs = text => String(text ?? '').split(/\n\s*\n/).map(p => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`).join('');
+
+// Edit-mode buttons on each item (hidden unless editing)
+const tool = (act, html, title, cls = '') => `<button class="tool ${cls}" data-act="${act}" title="${title}" aria-label="${title}">${html}</button>`;
+const tools = (extra = '') => editing
+  ? `<div class="item-tools">${tool('grip', gripIcon, 'Drag to reorder', 'grip')}${extra}${tool('prev', chevronL, 'Move earlier')}${tool('next', chevronR, 'Move later')}${tool('delete', xIcon, 'Remove', 'danger')}</div>`
+  : '';
+
+/* Pager: splits items into sideways pages with arrows, dots, and swipe.
+   Remembers which page it was on when re-rendered. */
+function buildPager(el, items, perPage, pageClass, renderPage, emptyText = 'Nothing here yet.') {
+  window.StlViewers?.dispose(el);
+  unwatchLazy(el);
+  if (document.body.classList.contains('single')) perPage = Infinity;   // sub-pages: one long scrolling list
+  const pages = [];
+  for (let i = 0; i < items.length; i += perPage) pages.push({ items: items.slice(i, i + perPage), start: i });
+  const pagesHtml = pages.length
+    ? pages.map(p => `<div class="pager-page ${pageClass}">${renderPage(p.items, p.start)}</div>`).join('')
+    : `<div class="pager-page ${pageClass}"><p class="empty glass">${emptyText}</p></div>`;
+  el.innerHTML =
+    `<div class="pager-view"><div class="pager-track">${pagesHtml}</div></div>
+    <button class="pager-btn prev" aria-label="Previous page">${chevronL}</button>
+    <button class="pager-btn next" aria-label="Next page">${chevronR}</button>
+    <div class="pager-dots glass">${pages.map((_, i) => `<button aria-label="Page ${i + 1}"></button>`).join('')}</div>`;
+  el.classList.toggle('one-page', pages.length < 2);
+
+  const view = el.querySelector('.pager-view');
+  const track = el.querySelector('.pager-track');
+  const prev = el.querySelector('.prev'), next = el.querySelector('.next');
+  const dots = [...el.querySelectorAll('.pager-dots button')];
+  const last = Math.max(0, pages.length - 1);
+
+  function go(i, animate = true) {
+    el._index = Math.max(0, Math.min(last, i));
+    if (!animate) track.style.transition = 'none';
+    track.style.transform = `translateX(calc(${-el._index} * (100% + 60px)))`;
+    if (!animate) { track.offsetWidth; track.style.transition = ''; }
+    prev.disabled = el._index === 0;
+    next.disabled = el._index === last;
+    dots.forEach((d, j) => d.classList.toggle('on', j === el._index));
+    [...track.children].forEach((p, j) => (p.inert = j !== el._index));
+  }
+  prev.addEventListener('click', () => go(el._index - 1));
+  next.addEventListener('click', () => go(el._index + 1));
+  dots.forEach((d, j) => d.addEventListener('click', () => go(j)));
+
+  let startX = null;                         // swipe on touch screens
+  view.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') startX = e.clientX; });
+  view.addEventListener('pointerup', e => {
+    if (startX === null) return;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 50) go(el._index + (dx < 0 ? 1 : -1));
+    startX = null;
+  });
+  view.addEventListener('pointercancel', () => (startX = null));
+  go(el._index ?? 0, false);
+  watchLazy(el);
+  setEditable(el);
+  window.StlViewers?.init(el);
+}
+
+/* =========================================================
+   Renderers (everything is drawn from C)
+   ========================================================= */
+// The home image for whichever portfolio is showing
+const FEAT = () => !isStem() ? C.feature
+  : (C.featureStem ??= { image: structuredClone(C.gallery.find(g => catsOf(g).includes('Robotics'))?.image ?? FEAT().image) });
+function renderFeature() {
+  const box = $('feature-media'), img = FEAT().image;
+  box.innerHTML = media(img);
+  // A crop shape (e.g. 16/9) fixes the box's proportions; otherwise it follows the image
+  box.classList.toggle('shaped', !!img?.aspect);
+  box.style.cssText = img?.aspect ? `--ar:${img.aspect};--fw:min(640px, 52vw)` : '';
+  document.querySelector('.t-feature .item-tools').outerHTML = editing
+    ? `<div class="item-tools">${isImg(FEAT().image) ? cropTool() : ''}${tool('image', imageIcon, 'Replace image')}</div>`
+    : '<div class="item-tools"></div>';
+}
+
+// Gallery filter tabs: one per category tag (an item can have several)
+const GALLERY_CATS = ['Photography', 'Travel', 'Drone Shots', 'Life', 'Robotics'];
+let galleryFilter = 'All';
+const isStem = () => document.documentElement.classList.contains('stem');
+const STEM_CATS = ['Robotics'];                    // gallery tags that belong to the STEM portfolio
+// STEM shows items tagged Robotics; Non-STEM shows items with any other tag (or none).
+// An item tagged both (e.g. Robotics + Life) shows in both.
+const inPortfolio = g => isStem() ? catsOf(g).some(c => STEM_CATS.includes(c)) : !catsOf(g).length || catsOf(g).some(c => !STEM_CATS.includes(c));
+function renderGalleryFilters() {
+  const cats = isStem() ? STEM_CATS : ['All', ...GALLERY_CATS.filter(c => !STEM_CATS.includes(c))];
+  if (!cats.includes(galleryFilter)) galleryFilter = cats[0];
+  $('gallery-filters').innerHTML = cats.map(c => `<button class="chip${c === galleryFilter ? ' on' : ''}" data-f="${esc(c)}">${esc(c)}</button>`).join('');
+}
+$('gallery-filters').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  galleryFilter = chip.dataset.f;
+  $('gallery-pager')._index = 0;
+  renderGallery();
+});
+const catsOf = g => g.categories || (g.category ? [g.category] : []);
+const galleryCatToggles = g => `<span class="cat-toggles">${GALLERY_CATS.map(c => `<button class="cat-tog${catsOf(g).includes(c) ? ' on' : ''}" data-act="tag" data-tag="${c}" aria-pressed="${catsOf(g).includes(c)}">${c}</button>`).join('')}</span>`;
+const galleryList = () => C.gallery.map((g, i) => ({ g, i })).filter(({ g }) => inPortfolio(g) && (galleryFilter === 'All' || catsOf(g).includes(galleryFilter)));
+
+/* Gallery
+   Each item has a "size" per category tab (1 = one tile; any value from 0.5 to 2). On the main page the
+   tiles are the 2 rows of a sideways strip that drifts slowly and loops forever; on the
+   Gallery page the tiles are columns and everything flows top-down. Items are packed
+   tightly by packTiles() at whatever sizes they have. */
+const GAL_GAP = 14, GAL_PAD = 8, SIZE_MIN = 0.5, SIZE_MAX = 2;
+// Sizes are per category tab: g.size is the All tab, g.sizes[tab] the others (unset tabs use the All size)
+const galSize = g => Math.max(SIZE_MIN, Math.min(SIZE_MAX, +(galleryFilter !== 'All' && g.sizes?.[galleryFilter]) || +g.size || 1));
+function setGalSize(g, v) {
+  if (galleryFilter === 'All') g.size = v;
+  else (g.sizes ||= {})[galleryFilter] = v;
+}
+const natRatio = new Map();                         // learned shapes of uploaded images
+function aspectOf(g) {
+  const im = g.image;
+  if (im?.aspect) { const [x, y] = String(im.aspect).split('/').map(Number); if (x && y) return x / y; }
+  const src = srcOf(im);
+  if (natRatio.has(src)) return natRatio.get(src);
+  if (MEDIA[src]) return MEDIA[src].size[0] / MEDIA[src].size[1];
+  if (isVideo(im)) return 16 / 9;
+  return isImg(im) ? 4 / 3 : 1;
+}
+// Pack boxes along the main axis (x) inside a fixed cross size H: each box goes to the
+// left-most spot it fits, then the top-most. Returns [{x, y}].
+function packTiles(boxes, H, gap) {
+  const placed = [], out = [];
+  for (const bx of boxes) {
+    const w = bx.w, h = Math.min(bx.h, H);
+    const near = placed.slice(-24);
+    const xs = [...new Set([0, ...near.map(r => r.x + r.w + gap)])].sort((p, q) => p - q);
+    let best = null;
+    for (const x of xs) {
+      const hit = placed.filter(r => r.x < x + w + gap - 0.5 && r.x + r.w + gap > x + 0.5);
+      const ys = [0, ...hit.map(r => r.y + r.h + gap)].sort((p, q) => p - q);
+      for (const y of ys) {
+        if (y + h > H + 0.5) break;
+        if (hit.every(r => y + h + gap <= r.y + 0.5 || y >= r.y + r.h + gap - 0.5)) { best = { x, y }; break; }
+      }
+      if (best) break;
+    }
+    if (!best) best = { x: placed.reduce((m, r) => Math.max(m, r.x + r.w + gap), 0), y: 0 };
+    placed.push({ ...best, w, h });
+    out.push(best);
+  }
+  return out;
+}
+
+const gal = { copies: 1, period: 0, acc: 0, hover: false, drag: null, tween: null, last: 0 };
+function renderGallery() {
+  renderGalleryFilters();
+  const host = $('gallery-pager');
+  const single = document.body.classList.contains('single');
+  unwatchLazy(host);
+  const list = galleryList();
+  gal.copies = !single && !editing && list.length > 2 && !gal.noLoop ? 3 : 1;
+  host.className = 'gal ' + (single ? 'flow' : 'strip') + (gal.copies === 1 ? ' static' : '');
+  const item = ({ g, i }, copy) => `
+    <figure class="glass item gal-item" data-list="gallery" data-i="${i}"${copy ? ' data-copy="1" aria-hidden="true"' : ''}>
+      ${copy ? '' : tools((isVideo(g.image) ? tool('trim', scissorsIcon, 'Trim video') : '') + (isImg(g.image) ? cropTool() : '') + tool('image', imageIcon, 'Replace photo or video'))}
+      <div class="media">${media(g.image, icon, THUMB_LAZY)}${isVideo(g.image) ? `<span class="play-badge">${playIcon}</span>` : ''}</div>
+      ${editing && !copy ? `<button class="resize-handle" data-act="resize" title="Drag to resize" aria-label="Drag to resize">${svg('<path d="M14 20h6v-6M10 4H4v6M20 20 13 13M4 4l7 7"/>')}</button>` : ''}
+    </figure>`;
+  let html = '';
+  for (let c = 0; c < gal.copies; c++) html += list.map(x => item(x, c)).join('');
+  host.innerHTML = list.length
+    ? `<div class="gal-view"><div class="gal-track">${html}</div></div>` +
+      (single ? '' : `<button class="gal-btn prev" aria-label="Scroll left">${chevronL}</button><button class="gal-btn next" aria-label="Scroll right">${chevronR}</button>`)
+    : '<p class="gal-empty glass">Nothing in this category yet.</p>';
+  layoutGallery();
+  const view = host.querySelector('.gal-view');
+  if (view && gal.copies > 1) {
+    if (gal.period < view.clientWidth + 200) { gal.noLoop = true; renderGallery(); gal.noLoop = false; return; }   // too few to loop
+    view.scrollLeft = gal.acc = gal.period;          // start on the middle copy
+  }
+  watchLazy(host);
+  setEditable(host);
+  host.querySelectorAll('img').forEach(im => {      // uploaded images: learn their shape once loaded
+    if (!String(im.getAttribute('src') || im.dataset.src || '').startsWith('data:')) return;
+    im.addEventListener('load', () => { natRatio.set(im.getAttribute('src'), im.naturalWidth / im.naturalHeight); layoutGallery(); }, { once: true });
+  });
+  // Videos preview silently while hovered
+  host.querySelectorAll('figure').forEach(fig => {
+    const v = fig.querySelector('video');
+    if (!v) return;
+    fig.addEventListener('mouseenter', () => { hydrateEl(v); v.play().then(() => fig.classList.add('playing')).catch(() => {}); });
+    fig.addEventListener('mouseleave', () => { v.pause(); fig.classList.remove('playing'); });
+  });
+}
+
+function layoutGallery() {
+  const host = $('gallery-pager'), track = host.querySelector('.gal-track');
+  if (!track) return;
+  const figs = [...track.children], n = figs.length / gal.copies;
+  const items = figs.slice(0, n).map(fig => C.gallery[+fig.dataset.i]);
+  if (host.classList.contains('strip')) {
+    const tile = innerWidth < 600 ? 120 : innerWidth < 1000 ? 165 : 205;
+    const H = tile * 2 + GAL_GAP;
+    const boxes = items.map(g => {
+      const sz = galSize(g), h = Math.min(H, sz * tile + Math.max(0, sz - 1) * GAL_GAP);
+      return { w: (h - 2 * GAL_PAD) * aspectOf(g) + 2 * GAL_PAD, h };
+    });
+    const pos = packTiles(boxes, H, GAL_GAP);
+    gal.period = Math.max(...pos.map((p, k) => p.x + boxes[k].w)) + GAL_GAP;
+    figs.forEach((fig, k) => {
+      const bx = boxes[k % n], p = pos[k % n], c = Math.floor(k / n);
+      fig.style.cssText = `left:${p.x + c * gal.period}px;top:${p.y}px;width:${bx.w}px;height:${bx.h}px`;
+    });
+    track.style.cssText = `height:${H}px;width:${gal.period * gal.copies - GAL_GAP}px`;
+  } else {
+    const W = track.clientWidth || host.clientWidth;
+    const cols = innerWidth < 600 ? 2 : innerWidth < 860 ? 3 : 4;
+    const tile = (W - (cols - 1) * GAL_GAP) / cols;
+    const boxes = items.map(g => {
+      const sz = galSize(g), w = Math.min(W, sz * tile + Math.max(0, sz - 1) * GAL_GAP);
+      return { w, h: (w - 2 * GAL_PAD) / aspectOf(g) + 2 * GAL_PAD };
+    });
+    // same packing with the axes swapped: fixed width, growing downward
+    const pos = packTiles(boxes.map(bx => ({ w: bx.h, h: bx.w })), W, GAL_GAP);
+    let bottom = 0;
+    figs.forEach((fig, k) => {
+      const bx = boxes[k], p = pos[k];
+      fig.style.cssText = `left:${p.y}px;top:${p.x}px;width:${bx.w}px;height:${bx.h}px`;
+      bottom = Math.max(bottom, p.x + bx.h);
+    });
+    track.style.cssText = `height:${bottom}px`;
+  }
+}
+addEventListener('resize', () => { clearTimeout(gal.rt); gal.rt = setTimeout(() => { layoutGallery(); }, 120); });
+// also re-lay out whenever the gallery's width changes (e.g. it was hidden and is now shown)
+new ResizeObserver(() => { const w = $('gallery-pager').clientWidth; if (w && w !== gal.w) { gal.w = w; layoutGallery(); } }).observe($('gallery-pager'));
+
+// The strip: slow automatic drift, sideways scrolling, mouse dragging, endless looping
+{
+  const SPEED = 24;                                   // px per second
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const view = () => $('gallery-pager').querySelector('.gal.strip .gal-view, .strip > .gal-view');
+  function wrap(v) {                                  // stay on the middle copy so it never runs out
+    if (gal.copies < 3 || !gal.period) return;
+    if (v.scrollLeft < gal.period * 0.5) { v.scrollLeft += gal.period; gal.acc += gal.period; }
+    else if (v.scrollLeft > gal.period * 1.5) { v.scrollLeft -= gal.period; gal.acc -= gal.period; }
+  }
+  function frame(now) {
+    const dt = Math.min(0.05, (now - (gal.last || now)) / 1000);
+    gal.last = now;
+    const v = view();
+    if (v) {
+      if (Math.abs(v.scrollLeft - gal.acc) > 3) gal.acc = v.scrollLeft;   // the visitor scrolled it
+      if (gal.tween) {
+        const t = Math.min(1, (now - gal.tween.t0) / 550), e = 1 - Math.pow(1 - t, 3);
+        gal.acc = gal.tween.from + (gal.tween.to - gal.tween.from) * e;
+        v.scrollLeft = gal.acc;
+        if (t >= 1) gal.tween = null;
+      } else if (!reduce && gal.copies > 1 && !gal.hover && !gal.drag && !editing && !document.hidden
+                 && !lb.classList.contains('open') && !document.body.classList.contains('modal-open')) {
+        gal.acc += SPEED * dt;
+        v.scrollLeft = gal.acc;
+      }
+      wrap(v);
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  const host = $('gallery-pager');
+  host.addEventListener('scroll', e => { if (e.target.classList?.contains('gal-view')) wrap(e.target); }, true);
+  host.addEventListener('pointerenter', () => (gal.hover = true));
+  host.addEventListener('pointerleave', () => (gal.hover = false));
+  host.addEventListener('click', e => {               // arrow buttons: glide about one screen
+    const btn = e.target.closest('.gal-btn');
+    const v = view();
+    if (!btn || !v) return;
+    const dir = btn.classList.contains('next') ? 1 : -1;
+    gal.tween = { from: v.scrollLeft, to: v.scrollLeft + dir * v.clientWidth * 0.8, t0: performance.now() };
+    if (gal.copies < 3) gal.tween.to = Math.max(0, Math.min(v.scrollWidth - v.clientWidth, gal.tween.to));
+  });
+  // drag with the mouse to scroll sideways (touch screens swipe natively)
+  host.addEventListener('pointerdown', e => {
+    const v = view();
+    if (!v || e.pointerType !== 'mouse' || e.button !== 0 || !v.contains(e.target)) return;
+    if (e.target.closest('.item-tools, .resize-handle, [contenteditable]')) return;
+    gal.drag = { x: e.clientX, start: v.scrollLeft, moved: false, id: e.pointerId };
+  });
+  addEventListener('pointermove', e => {
+    const d = gal.drag, v = view();
+    if (!d || !v) return;
+    if (!d.moved && Math.abs(e.clientX - d.x) > 5) { d.moved = true; v.classList.add('grabbing'); v.setPointerCapture?.(d.id); }
+    if (d.moved) { v.scrollLeft = d.start - (e.clientX - d.x); gal.acc = v.scrollLeft; wrap(v); d.start = v.scrollLeft + (e.clientX - d.x); }
+  });
+  addEventListener('pointerup', () => {
+    if (!gal.drag) return;
+    if (gal.drag.moved) { view()?.classList.remove('grabbing'); gal.justDragged = true; setTimeout(() => (gal.justDragged = false), 0); }
+    gal.drag = null;
+  });
+}
+
+// Edit mode: drag an item's corner to resize it (any size, no snapping)
+{
+  let rz = null;
+  document.addEventListener('pointerdown', e => {
+    const h = editing && e.button === 0 && e.target.closest('.resize-handle');
+    if (!h) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const fig = h.closest('.gal-item'), g = C.gallery[+fig.dataset.i];
+    const r = fig.getBoundingClientRect();
+    rz = { g, fig, x: e.clientX, y: e.clientY, w: r.width, h: r.height, size: galSize(g), strip: $('gallery-pager').classList.contains('strip') };
+    document.documentElement.classList.add('resizing', 'no-select');
+  }, true);
+  addEventListener('pointermove', e => {
+    if (!rz) return;
+    // keep the shape: use whichever way the corner moved further
+    const scale = Math.max((rz.w + (e.clientX - rz.x)) / rz.w, (rz.h + (e.clientY - rz.y)) / rz.h);
+    setGalSize(rz.g, Math.round(Math.max(SIZE_MIN, Math.min(SIZE_MAX, rz.size * scale)) * 100) / 100);
+    layoutGallery();
+  });
+  addEventListener('pointerup', () => {
+    if (!rz) return;
+    rz = null;
+    document.documentElement.classList.remove('resizing', 'no-select');
+    gal.justDragged = true;                            // letting go isn't a click on the item
+    setTimeout(() => (gal.justDragged = false), 0);
+    save();
+  });
+}
+
+// Info bubble: drops down from the hovered gallery item with its title and location
+// (or pops up above it when there's no room below), and follows the item as it moves.
+{
+  const tip = Object.assign(document.createElement('div'), { id: 'hover-tip' });
+  document.body.appendChild(tip);
+  const host = $('gallery-pager');
+  let cur = null, raf = 0;
+  function place() {
+    if (!cur) return;
+    const r = cur.getBoundingClientRect(), th = tip.offsetHeight, tw = tip.offsetWidth;
+    const above = r.bottom + 12 + th > innerHeight - 8 && r.top - 12 - th > 8;
+    const cx = r.left + r.width / 2, left = Math.max(8, Math.min(cx - tw / 2, innerWidth - tw - 8));
+    tip.classList.toggle('above', above);
+    tip.style.left = left + 'px';
+    tip.style.top = (above ? r.top - 12 - th : r.bottom + 12) + 'px';
+    tip.style.setProperty('--ax', Math.max(16, Math.min(tw - 16, cx - left)) + 'px');   // pointer stays on the item
+    raf = requestAnimationFrame(place);
+  }
+  function hide() { cur = null; cancelAnimationFrame(raf); tip.classList.remove('show'); }
+  host.addEventListener('pointermove', e => {
+    const fig = e.target.closest('.gal-item');
+    if (!fig || e.pointerType !== 'mouse' || gal.drag?.moved || e.target.closest('.item-tools, .resize-handle')) { hide(); return; }
+    if (fig === cur) return;
+    const g = C.gallery[+fig.dataset.i];
+    tip.innerHTML = (g.title ? `<div class="t">${esc(g.title)}</div>` : '') +
+      (g.location ? `<div class="l">${esc(g.location)}</div>` : '') +
+      `<div class="more">${editing ? 'Click to edit details' : 'Click for more info'}</div>`;
+    tip.classList.remove('show');
+    cancelAnimationFrame(raf);
+    cur = fig;
+    place();
+    requestAnimationFrame(() => cur === fig && tip.classList.add('show'));
+  });
+  host.addEventListener('pointerleave', hide);
+  host.addEventListener('pointerdown', hide);
+}
+
+let dishFilter = 'all';
+function renderDishes() {
+  const list = C.creations.map((d, i) => ({ d, i })).filter(({ d }) => dishFilter === 'all' || d.cat === dishFilter);
+  buildPager($('dish-pager'), list, PER_PAGE.creations, 'dishes', items => items.map(({ d, i }) => `
+    <div class="dish glass item" role="button" tabindex="0" data-list="creations" data-i="${i}">
+      ${tools((isImg(d.photos[0]) ? cropTool() : '') + tool('photos', cameraIcon, 'Manage photos'))}
+      <div class="media">${media(d.photos[0] ?? 180, icon, THUMB_LAZY)}<span class="count">${cameraIcon}${d.photos.length}</span></div>
+      <div class="dish-body">
+        <h3 data-field="name">${esc(d.name)}</h3>
+        <p data-field="summary">${esc(d.summary)}</p>
+        <div class="pills">${editing ? catSelect(d.cat) : `<span>${label(d.cat)}</span>`}</div>
+      </div>
+    </div>`).join(''), 'Nothing in this category yet.');
+}
+const catSelect = cat => `<select data-field="cat" aria-label="Category">${CATS.map(c => `<option value="${c}"${c === cat ? ' selected' : ''}>${label(c)}</option>`).join('')}</select>`;
+
+// Download / Code / Live buttons for a project (used on the rows and in its pop-up)
+const projectLinks = p => `${p.download ? `<a class="dl" href="${esc(p.download.src)}" download="${esc(p.download.name)}" title="${esc(p.download.name)}">${downloadIcon}Download${p.download.size ? ` <small>${fmtSize(p.download.size)}</small>` : ''}</a>` : ''}
+  ${p.code ? `<a href="${esc(p.code)}" target="_blank" rel="noopener">Code ↗</a>` : ''}
+  ${p.live ? `<a href="${esc(p.live)}" target="_blank" rel="noopener">Live ↗</a>` : ''}`;
+const projectIcon = (p, big = false) => isImg(p.icon)
+  ? `<div class="icon-tile${big ? ' big' : ''}"><img ${big ? 'src' : 'data-src'}="${esc(srcOf(p.icon))}" alt=""></div>`
+  : media(p.icon, codeIcon);
+
+function renderProjects() {
+  buildPager($('project-pager'), C.projects, PER_PAGE.projects, 'rows', (items, start) => items.map((p, k) => `
+    <article class="row glass item" role="button" tabindex="0" data-list="projects" data-i="${start + k}">
+      ${tools(tool('image', imageIcon, 'Replace icon') + tool('photos', cameraIcon, 'Manage photos') + tool('file', clipIcon, p.download ? 'Replace download file' : 'Attach a download file'))}
+      <div class="media">${projectIcon(p)}</div>
+      <div>
+        <h3 data-field="name">${esc(p.name)}</h3>
+        <p data-field="summary">${esc(p.summary)}</p>
+        <div class="pills">${editing
+          ? `<span class="tags-edit" data-field="tags" title="Tags, separated by commas">${esc(p.tags.join(', '))}</span>`
+          : p.tags.map(t => `<span>${esc(t)}</span>`).join('')}${p.photos?.length && !editing ? `<span class="photo-count">${cameraIcon}${p.photos.length}</span>` : ''}</div>
+      </div>
+      <div class="links">${editing
+        ? `<input type="url" data-field="code" placeholder="Code link (https://…)" value="${esc(p.code)}">
+           <input type="url" data-field="live" placeholder="Live link (https://…)" value="${esc(p.live)}">
+           ${p.download ? `<span class="file-chip" title="${esc(p.download.name)}">${clipIcon}<span>${esc(p.download.name)}</span>${tool('unfile', xIcon, 'Remove download file', 'danger')}</span>` : ''}`
+        : projectLinks(p)}</div>
+    </article>`).join(''), 'No projects yet.');
+}
+
+// 3D models: clicking a small model swaps it into the big spot (just for viewing;
+// Edit mode's arrows change the saved order)
+let modelOrder = null;
+const WARM_OF = { '#1fb5a0': '#e4502f', '#2b7fd4': '#e8642c', '#3ccf7a': '#f2b33d', '#3fc8db': '#f59e3b', '#7fe0c0': '#ffc98a', '#5aa9e6': '#f07a5a' };
+const shown = c => WARM_OF[String(c).toLowerCase()] || c;      // models only appear in STEM
+const viewer = m => `<div class="stl-viewer" data-color="${esc(shown(m.color))}" data-rim="${esc(shown(m.rim))}"${m.stl ? ` data-stl="${esc(m.stl)}"` : ''}></div>`;
+const colorEdit = m => editing ? `<label class="color-edit">Color <input type="color" data-field="color" value="${esc(shown(m.color))}"></label>` : '';
+function renderModels() {
+  if (!modelOrder || modelOrder.length !== C.models.length) modelOrder = C.models.map((_, i) => i);
+  const items = modelOrder.map(i => ({ m: C.models[i], i }));
+  const modelTools = tool('stl', uploadIcon, 'Replace .stl file');
+  buildPager($('model-pager'), items, PER_PAGE.models, 'model-stage', ([first, ...rest], start) => `
+    <div class="stage glass item" data-list="models" data-i="${first.i}" data-pos="${start}">
+      ${tools(modelTools)}
+      ${viewer(first.m)}<span class="label" data-field="name">${esc(first.m.name)}</span>${colorEdit(first.m)}
+    </div>
+    <div class="model-list">${rest.map(({ m, i }, k) => `
+      <div class="model-item glass item" data-list="models" data-i="${i}" data-pos="${start + 1 + k}" title="Show this model big">
+        ${tools(modelTools)}
+        ${viewer(m)}
+        <div><h3 data-field="name">${esc(m.name)}</h3><p data-field="summary">${esc(m.summary)}</p>${colorEdit(m)}</div>
+      </div>`).join('')}
+    </div>`, 'No models yet.');
+}
+{
+  let down = null;   // a click (not a drag to spin) on a small model makes it the big one
+  $('model-pager').addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY }; });
+  $('model-pager').addEventListener('click', e => {
+    const item = e.target.closest('.model-item');
+    const moved = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6;
+    if (!item || moved || e.target.closest('.item-tools, input, label, [contenteditable]')) return;
+    const page = item.closest('.pager-page');
+    const featured = +page.querySelector('.stage').dataset.pos, clicked = +item.dataset.pos;
+    [modelOrder[featured], modelOrder[clicked]] = [modelOrder[clicked], modelOrder[featured]];
+    renderModels();
+  });
+}
+
+function renderSkills() {
+  $('skills').innerHTML = C.skills.map((s, i) => `
+    <span class="skill item" data-list="skills" data-i="${i}"><span data-field="name">${esc(s.name)}</span>${tools()}</span>`).join('')
+    + `<button class="add-btn" data-act="add" data-list="skills">+ Add</button>`;
+  setEditable($('skills'));
+}
+
+function updateCounts() {}   // (the home page count tiles were removed)
+
+const RENDER = { gallery: renderGallery, creations: renderDishes, projects: renderProjects, models: renderModels, skills: renderSkills };
+function rerender(list) {
+  if (list === 'models') modelOrder = null;     // saved order changed
+  RENDER[list]();
+  updateCounts();
+}
+function renderAll() {
+  renderFeature();
+  Object.values(RENDER).forEach(fn => fn());
+  updateCounts();
+  setEditable(document);
+}
+
+// STEM gets its own copy of these; until you edit it, it starts from the Non-STEM text
+const MODE_TEXT = {
+  'hero-title': v => v.replace(/Non[-\s]?STEM/gi, 'STEM'),
+  'hero-intro': v => v,
+  'nav-gallery': () => 'Robotics',
+  'title-gallery': () => 'Robotics',
+  'gallery-blurb': () => '',
+  'about-title': v => v,
+  'about-body': v => v,
+};
+function applyText() {
+  const stem = isStem();
+  document.querySelectorAll('[data-edit]').forEach(el => {
+    const base = (el.dataset.base ??= el.dataset.edit);
+    el._def ??= el.innerHTML;                         // the built-in text
+    if (base in MODE_TEXT) {
+      el.dataset.edit = stem ? base + '-stem' : base;
+      const non = C.text[base] ?? el._def;
+      el.innerHTML = stem ? (C.text[base + '-stem'] ?? MODE_TEXT[base](non)) : non;
+      return;
+    }
+    const v = C.text[base];
+    if (v != null) el.innerHTML = v;
+  });
+  document.title = siteTitle();
+}
+const siteName = () => document.querySelector('[data-edit="site-name"]').textContent.trim();
+const siteTitle = (page = null) => page ? `${page} · ${siteName()}` : siteName();
+
+/* =========================================================
+   Gallery viewer: the photo in a frame that fits it, with its title,
+   location, category and camera details beside it
+   ========================================================= */
+const lb = $('lightbox');
+const pinIcon = svg('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>');
+let lbList = [], lbPos = 0;
+const fmtDate = d => { const [y, m, day] = d.split('-').map(Number); return new Date(y, m - 1, day).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); };
+function lbDetails(g) {
+  const m = (window.MEDIA_META || {})[g.image?.orig || srcOf(g.image)] || {};
+  const lens = m.lens && m.camera ? m.lens.replace(m.camera.replace(/^Apple /, ''), '').trim() : m.lens;
+  const rows = [
+    ['Camera', m.camera], ['Lens', lens && lens[0].toUpperCase() + lens.slice(1)],
+    ['Shutter', m.shutter], ['Aperture', m.aperture], ['ISO', m.iso], ['Focal length', m.focal],
+    ['Video', m.resolution && [m.resolution, m.fps && `${m.fps} fps`].filter(Boolean).join(' · ')], ['Length', trimmedLength(g.image, m.length)],
+    ['Taken', m.date && fmtDate(m.date)],
+  ].filter(([, v]) => v);
+  return rows.length ? `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : '';
+}
+function showLightbox(pos) {
+  lbPos = (pos + lbList.length) % lbList.length;
+  const g = C.gallery[lbList[lbPos]], img = g.image;
+  const arrows = lbList.length > 1
+    ? `<button class="arrow-btn prev" aria-label="Previous">${chevronL}</button><button class="arrow-btn next" aria-label="Next">${chevronR}</button>` : '';
+  $('lb-media').innerHTML = (isVideo(img)                // full video with sound and controls
+    ? `<video disablepictureinpicture controlslist="nopictureinpicture" src="${esc(srcOf(img))}"${posterOf(img) ? ` poster="${esc(posterOf(img))}"` : ''}${trimAttrs(img)} controls autoplay playsinline></video>`
+    : media(isImg(img) ? srcOf(img) : img));             // full, uncropped image
+  $('lb-media').parentElement.querySelectorAll('.arrow-btn').forEach(b => b.remove());
+  $('lb-media').insertAdjacentHTML('afterend', arrows);
+  const info = $('lb-info');
+  info.dataset.list = 'gallery';
+  info.dataset.i = lbList[lbPos];
+  info.innerHTML = `
+    <button class="close-btn" aria-label="Close">${xIcon}</button>
+    <h3 id="lb-title" data-field="title">${esc(g.title)}</h3>
+    ${g.location || editing ? `<p class="lb-loc">${pinIcon}<span data-field="location">${esc(g.location)}</span></p>` : ''}
+    ${editing ? galleryCatToggles(g)
+      : catsOf(g).length ? `<div class="pills">${catsOf(g).map(c => `<span>${esc(c)}</span>`).join('')}</div>` : ''}
+    ${lbDetails(g)}`;
+  setEditable(info);
+}
+$('gallery-pager').addEventListener('click', e => {
+  const fig = e.target.closest('figure');
+  if (!fig || gal.justDragged || e.target.closest('.gal-btn')) return;
+  fig.querySelector('video')?.pause();
+  lbList = galleryList().map(({ i }) => i);
+  showLightbox(lbList.indexOf(+fig.dataset.i));
+  lb.classList.add('open');
+  lb.setAttribute('aria-hidden', 'false');
+});
+const closeLightbox = () => { lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); $('lb-media').innerHTML = ''; };
+lb.addEventListener('click', e => {
+  if (e.target.closest('.arrow-btn.prev')) return showLightbox(lbPos - 1);
+  if (e.target.closest('.arrow-btn.next')) return showLightbox(lbPos + 1);
+  if (e.target.closest('.close-btn') || !e.target.closest('.lb-frame, .lb-info')) closeLightbox();
+});
+
+/* =========================================================
+   Cooking filters + pop-ups for cooking creations and coding projects
+   ========================================================= */
+$('dish-filters').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  document.querySelector('#dish-filters .on').classList.remove('on');
+  chip.classList.add('on');
+  dishFilter = chip.dataset.f;
+  $('dish-pager')._index = 0;
+  renderDishes();
+});
+
+const modal = $('modal');
+const mViewer = $('m-viewer');
+const mThumbs = $('m-thumbs');
+let openList = 'creations', openIndex = -1, photoIndex = 0;
+const openItem = () => C[openList][openIndex];
+const photosOf = item => (item.photos ||= []);
+
+function showPhoto(i) {
+  const item = openItem(), photos = photosOf(item);
+  const n = photos.length;
+  photoIndex = n ? (i + n) % n : 0;
+  const arrows = n > 1
+    ? `<button class="arrow-btn prev" aria-label="Previous photo">${chevronL}</button><button class="arrow-btn next" aria-label="Next photo">${chevronR}</button>`
+    : '';
+  const empty = openList === 'projects' ? projectIcon(item, true) : media(180);   // projects show their icon until they have photos
+  mViewer.innerHTML = (n ? media(photos[photoIndex]) : empty) + arrows +
+    `<span class="count">${n ? `${photoIndex + 1} / ${n}` : 'No photos yet'}</span>`;
+  [...mThumbs.children].forEach((b, j) => b.classList.toggle('on', j === photoIndex));
+}
+function renderModal() {
+  const item = openItem(), isProject = openList === 'projects';
+  $('modal-card').dataset.list = openList;
+  $('modal-card').dataset.i = openIndex;
+  $('m-title').textContent = item.name;
+  $('m-cat').innerHTML = isProject
+    ? (editing ? `<span class="tags-edit" data-field="tags" title="Tags, separated by commas">${esc(item.tags.join(', '))}</span>` : item.tags.map(t => `<span>${esc(t)}</span>`).join(''))
+    : (editing ? catSelect(item.cat) : `<span>${label(item.cat)}</span>`);
+  // projects: the long description falls back to the short one until you write one
+  $('m-story').innerHTML = paragraphs(editing ? item.story ?? '' : item.story || (isProject ? item.summary : ''));
+  $('m-story').dataset.placeholder = 'Write a longer description…';
+  $('m-links').innerHTML = isProject && !editing ? projectLinks(item) : '';
+  mThumbs.innerHTML = photosOf(item).map((p, j) => `<button data-j="${j}" aria-label="Photo ${j + 1}">${media(p, icon, { thumb: true })}</button>`).join('');
+  showPhoto(photoIndex);
+  setEditable(modal);
+}
+function openModal(list, i) {
+  openList = list;
+  openIndex = i;
+  photoIndex = 0;
+  renderModal();
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+  if (!editing) $('m-close').focus();
+}
+function closeModal() {
+  if (openIndex < 0) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+  openIndex = -1;
+  if (editing) rerender(openList);
+}
+// Open a card / project row (but not when using its links)
+for (const [pager, sel, list] of [['dish-pager', '.dish', 'creations'], ['project-pager', '.row', 'projects']]) {
+  $(pager).addEventListener('click', e => {
+    const card = e.target.closest(sel);
+    if (card && !e.target.closest('a, .links')) openModal(list, +card.dataset.i);
+  });
+  $(pager).addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches(sel)) { e.preventDefault(); openModal(list, +e.target.dataset.i); }
+  });
+}
+mViewer.addEventListener('click', e => {
+  if (e.target.closest('.prev')) showPhoto(photoIndex - 1);
+  if (e.target.closest('.next')) showPhoto(photoIndex + 1);
+});
+mThumbs.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (b) showPhoto(+b.dataset.j);
+});
+$('m-close').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+addEventListener('keydown', e => {
+  const typing = e.target.isContentEditable || e.target.matches?.('input, select, textarea');
+  if (e.key === 'Escape') { closeModal(); closeLightbox(); }
+  if (typing) return;
+  if (openIndex >= 0 && e.key === 'ArrowLeft') showPhoto(photoIndex - 1);
+  if (openIndex >= 0 && e.key === 'ArrowRight') showPhoto(photoIndex + 1);
+  if (lb.classList.contains('open') && e.key === 'ArrowLeft') showLightbox(lbPos - 1);
+  if (lb.classList.contains('open') && e.key === 'ArrowRight') showLightbox(lbPos + 1);
+});
+
+/* =========================================================
+   Navigation: sliding selector, drag-to-snap, scroll spy,
+   and single-section pages (?page=gallery)
+   ========================================================= */
+const nav = (() => {
+  const navEl = $('nav');
+  const pill = $('nav-pill');
+  const allLinks = [...navEl.querySelectorAll('a')];
+  const allSections = allLinks.map(a => $(a.hash.slice(1)));
+  let links, ids, sections;
+  function collect() {                              // the links this portfolio shows
+    links = allLinks.filter(a => getComputedStyle(a).display !== 'none');
+    ids = links.map(a => a.hash.slice(1));
+    sections = ids.map(id => $(id));
+  }
+  collect();
+  const pageURL = page => {
+    const p = new URLSearchParams();
+    if (page) p.set('page', page);
+    if (isStem()) p.set('portfolio', 'stem');
+    return p.size ? '?' + p : location.pathname;
+  };
+  let current = 0, spyLocked = false, unlockTimer, drag = null, suppressClick = false;
+  let singleId = null;
+
+  const center = a => a.offsetLeft + a.offsetWidth / 2;
+  const pageName = id => links[ids.indexOf(id)].textContent.trim();
+  function placePill(x, w) {
+    pill.style.width = w + 'px';
+    pill.style.transform = `translateX(${x}px)`;
+  }
+  function highlight(i) { links.forEach((a, j) => a.classList.toggle('on', j === i)); }
+  function select(i) {
+    current = i;
+    placePill(links[i].offsetLeft, links[i].offsetWidth);
+    highlight(i);
+  }
+  function lockSpy() {
+    spyLocked = true;
+    clearTimeout(unlockTimer);
+    unlockTimer = setTimeout(() => (spyLocked = false), 1200);
+  }
+  window.addEventListener('scrollend', () => { clearTimeout(unlockTimer); unlockTimer = setTimeout(() => (spyLocked = false), 50); });
+
+  const NO_OWN_PAGE = ['about'];   // these sections only live on the main page
+  function showPage(id, { push = true, returnTo = null } = {}) {
+    if (NO_OWN_PAGE.includes(id)) {
+      if (!push) history.replaceState(null, '', pageURL(null));
+      return showPage('home', { push, returnTo: id });
+    }
+    const wasSingle = !!singleId;
+    singleId = id && id !== 'home' && ids.includes(id) ? id : null;
+    document.body.classList.toggle('single', !!singleId);
+    allSections.forEach(s => s.classList.toggle('active', s.id === singleId));
+    if (wasSingle !== !!singleId) renderAll();   // sub-pages list everything top-down instead of in pages (after the section is shown, so it can be measured)
+    if (push) history.pushState(null, '', pageURL(singleId));
+    document.title = siteTitle(singleId && pageName(singleId));
+    lockSpy();
+    if (returnTo) {
+      $(returnTo).scrollIntoView();
+      select(ids.indexOf(returnTo));
+    } else {
+      window.scrollTo(0, 0);
+      select(singleId ? ids.indexOf(singleId) : 0);
+    }
+  }
+
+  function activate(i) {
+    if (singleId) {
+      showPage(ids[i]);
+    } else {
+      select(i);
+      lockSpy();
+      sections[i].scrollIntoView({ behavior: 'smooth' });
+      history.replaceState(null, '', links[i].hash);
+    }
+  }
+
+  allLinks.forEach(a => a.addEventListener('click', e => {
+    e.preventDefault();
+    if (!suppressClick) activate(links.indexOf(a));
+  }));
+  $('logo').addEventListener('click', e => {
+    e.preventDefault();
+    singleId ? showPage('home') : activate(0);
+  });
+  $('back').addEventListener('click', e => {
+    e.preventDefault();
+    showPage('home', { returnTo: singleId });
+  });
+  document.querySelectorAll('.head-link').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault();
+    if (!singleId) showPage(a.closest('section').id);
+  }));
+  window.addEventListener('popstate', () => {
+    setPortfolio(new URLSearchParams(location.search).get('portfolio') === 'stem', { history: true });
+    showPage(new URLSearchParams(location.search).get('page'), { push: false });
+  });
+
+  // Drag the selector anywhere along the nav; snaps to the nearest on release.
+  function nearestAt(c) {
+    let best = 0;
+    links.forEach((a, i) => { if (Math.abs(center(a) - c) < Math.abs(center(links[best]) - c)) best = i; });
+    return best;
+  }
+  navEl.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || editing) return;
+    if (e.pointerType === 'mouse') e.preventDefault();   // stops text selection from starting
+    suppressClick = false;
+    drag = { id: e.pointerId, startX: e.clientX, startC: center(links[current]), moved: false, c: 0 };
+  });
+  navEl.addEventListener('dragstart', e => e.preventDefault());
+  document.addEventListener('selectstart', e => { if (drag) e.preventDefault(); });
+  navEl.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.startX;
+    if (!drag.moved) {
+      if (Math.abs(dx) < 5) return;
+      drag.moved = true;
+      navEl.setPointerCapture(e.pointerId);
+      navEl.classList.add('dragging');
+      document.documentElement.classList.add('no-select');
+      window.getSelection()?.removeAllRanges();
+    }
+    const centers = links.map(center);
+    const c = Math.max(centers[0], Math.min(centers[centers.length - 1], drag.startC + dx));
+    drag.c = c;
+    let i = 0;
+    while (i < centers.length - 2 && c > centers[i + 1]) i++;
+    const t = (c - centers[i]) / (centers[i + 1] - centers[i]);
+    const w = links[i].offsetWidth + (links[i + 1].offsetWidth - links[i].offsetWidth) * t;
+    placePill(c - w / 2, w);
+    highlight(nearestAt(c));
+  });
+  function endDrag(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (drag.moved) {
+      suppressClick = true;
+      navEl.classList.remove('dragging');
+      document.documentElement.classList.remove('no-select');
+      activate(nearestAt(drag.c));
+      setTimeout(() => (suppressClick = false), 0);
+    }
+    drag = null;
+  }
+  navEl.addEventListener('pointerup', endDrag);
+  navEl.addEventListener('pointercancel', endDrag);
+
+  const spy = new IntersectionObserver(entries => {
+    if (spyLocked || drag || singleId) return;
+    entries.forEach(entry => {
+      const i = sections.indexOf(entry.target);
+      if (entry.isIntersecting && i >= 0) select(i);
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  allSections.forEach(s => spy.observe(s));
+
+  const reselect = () => {
+    navEl.classList.add('dragging');         // no animation on layout changes
+    select(current);
+    requestAnimationFrame(() => navEl.classList.remove('dragging'));
+  };
+  window.addEventListener('resize', reselect);
+  document.fonts.ready.then(reselect);
+
+  function start() {
+    const startPage = new URLSearchParams(location.search).get('page');
+    if (startPage) showPage(startPage, { push: false });
+    reselect();
+  }
+  // after switching portfolios: new set of links; leave a sub-page the new portfolio doesn't have
+  function refresh({ history: fromHistory = false } = {}) {
+    collect();
+    if (singleId && !ids.includes(singleId)) return showPage('home', { push: !fromHistory });
+    if (!fromHistory) history.replaceState(null, '', pageURL(singleId));
+    document.title = siteTitle(singleId && pageName(singleId));
+    if (!singleId) window.scrollTo(0, 0);
+    reselect();
+  }
+  return { start, reselect, refresh };
+})();
+
+/* STEM / Non-STEM switch */
+const modeSwitch = $('mode-switch');
+function placeKnob() {
+  const on = modeSwitch.querySelector(`[data-mode="${isStem() ? 'stem' : 'non'}"]`);
+  modeSwitch.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b === on); b.setAttribute('aria-pressed', b === on); });
+  const k = modeSwitch.querySelector('.knob');
+  k.style.width = on.offsetWidth + 'px';
+  k.style.transform = `translateX(${on.offsetLeft}px)`;
+}
+// Colors start gliding at once; the content fades out, swaps while hidden, then fades back in.
+let switchTimer;
+function setPortfolio(stem, opts = {}) {
+  if (stem === isStem()) return;
+  const root = document.documentElement;
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches || document.hidden;
+  root.classList.toggle('stem', stem);
+  window.setPortalColors?.(stem, calm ? 0 : 600);
+  placeKnob();
+  clearTimeout(switchTimer);
+  const swap = () => {
+    root.dataset.show = stem ? 'stem' : 'non';
+    $('gallery-pager')._index = 0;
+    applyText();
+    renderFeature();
+    renderGallery();
+    // (Coding Projects, 3D Models and Cooking stay built while hidden, so switching never rebuilds
+    // the 3D viewers; they just resume drawing when they're back on screen)
+    if (editing) setEditable(document);
+    nav.refresh(opts);
+    // give the browser a moment to lay out the new page before lifting the veil
+    switchTimer = setTimeout(() => root.classList.remove('switching'), 60);
+  };
+  if (calm) return swap();
+  root.classList.add('switching');
+  switchTimer = setTimeout(swap, 210);
+}
+modeSwitch.addEventListener('click', e => {
+  const b = e.target.closest('[data-mode]');
+  if (b) setPortfolio(b.dataset.mode === 'stem');
+});
+const stillKnob = () => { modeSwitch.classList.add('still'); placeKnob(); requestAnimationFrame(() => modeSwitch.classList.remove('still')); };
+addEventListener('resize', stillKnob);
+document.fonts.ready.then(stillKnob);
+
+/* =========================================================
+   Edit mode
+   Saves to this browser (IndexedDB). Export downloads a
+   portfolio-content.json with everything, including images.
+   ========================================================= */
+const db = {
+  open() {
+    return this._p ??= new Promise((res, rej) => {
+      const r = indexedDB.open('portfolio-editor', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('kv');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+  },
+  async run(mode, fn) {
+    const d = await this.open();
+    return new Promise((res, rej) => {
+      const r = fn(d.transaction('kv', mode).objectStore('kv'));
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+  },
+  get: k => db.run('readonly', s => s.get(k)),
+  set: (k, v) => db.run('readwrite', s => s.put(v, k)),
+  del: k => db.run('readwrite', s => s.delete(k)),
+};
+
+const setStatus = t => ($('edit-status').textContent = t);
+let saveTimer;
+function save() {
+  setStatus('Saving…');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try { await db.set('content', C); setStatus('Saved in this browser'); }
+    catch (err) { setStatus('Could not save: ' + err.message); }
+  }, 400);
+}
+
+// When the built-in content changes, saved edits from before that change could hide it.
+// Each version lists which parts changed; those parts come from the new defaults unless
+// the saved copy has media you added yourself (uploaded files are stored as data: URLs).
+const CONTENT_VERSION = 11;
+const CHANGED_IN = { 4: ['feature', 'gallery', 'creations'], 5: ['gallery'] };
+function mergeDefaults(saved) {
+  const out = structuredClone(DEFAULT_CONTENT);
+  const from = saved.version ?? 0;
+  const replaced = new Set(Object.entries(CHANGED_IN).filter(([v]) => +v > from).flatMap(([, keys]) => keys));
+  for (const k of Object.keys(out)) {
+    if (saved[k] == null) continue;
+    const hasOwnMedia = JSON.stringify(saved[k]).includes('"data:');
+    if (!replaced.has(k) || hasOwnMedia) out[k] = saved[k];
+  }
+  // v6: Citation Generator got its real icon (keeps any other project edits)
+  if (from < 6) {
+    const p = out.projects.find(p => p.name === 'Citation Generator');
+    if (p && !isImg(p.icon)) p.icon = 'images/projects/citation-generator.svg';
+  }
+  // v7: Optica added to the coding projects (after Simple Scale)
+  if (from < 7 && !out.projects.some(p => p.name === 'Optica')) {
+    const at = out.projects.findIndex(p => p.name === 'Simple Scale');
+    out.projects.splice(at < 0 ? out.projects.length : at + 1, 0, structuredClone(OPTICA));
+  }
+  // v8: GitHub links and download files for the coding projects. Fills in only what's
+  // missing, so links or files you set yourself are kept; descriptions you never edited
+  // are updated (Server Packs+ and the phone right-click project).
+  if (from < 8) {
+    const oldSummaries = [
+      'Gives you more control over the resource packs servers send you, with per-server settings.',
+      'Lets an input on a phone trigger a right click in Minecraft on a laptop.',
+    ];
+    for (const p of out.projects) {
+      const d = DEFAULT_CONTENT.projects.find(x => x.name === p.name);
+      if (!d) continue;
+      if (!p.code && d.code) p.code = d.code;
+      if (!p.download && d.download) p.download = structuredClone(d.download);
+      if (oldSummaries.includes(p.summary)) { p.summary = d.summary; p.tags = [...d.tags]; }
+    }
+  }
+  // v9: gallery categories, spacing dashes, title colors
+  if (from < 9) {
+    for (const g of out.gallery) {                 // give saved gallery items their category
+      if (g.category && GALLERY_CATS.includes(g.category)) continue;
+      const d = DEFAULT_CONTENT.gallery.find(x => srcOf(x.image) === srcOf(g.image));
+      g.category = d ? catsOf(d)[0] : '';
+    }
+    for (const [k, v] of Object.entries(out.text)) {   // runs of dashes used as spacing -> spaces
+      if (/-{4,}/.test(v)) out.text[k] = v.replace(/-{4,}/g, m => ' '.repeat(Math.max(4, Math.round(m.length / 2))));
+    }
+    const PHRASE = 'Welcome to my Non-STEM Portfolio!';     // only this phrase of the title is colored
+    const t = out.text['hero-title'];
+    if (t) {
+      const plain = Object.assign(document.createElement('div'), { innerHTML: t }).textContent;
+      const at = plain.toLowerCase().indexOf(PHRASE.toLowerCase());
+      if (at >= 0) out.text['hero-title'] = esc(plain.slice(0, at)) + `<span class="grad-text">${esc(plain.slice(at, at + PHRASE.length))}</span>` + esc(plain.slice(at + PHRASE.length));
+    }
+  }
+  // v10: gallery categories became tags (a list per item)
+  if (from < 10) {
+    for (const g of out.gallery) {
+      if (!Array.isArray(g.categories)) g.categories = g.category ? [g.category] : [];
+      delete g.category;
+    }
+  }
+  // v11: the placeholder models (no .stl file) are gone
+  if (from < 11) out.models = out.models.filter(m => m.stl);
+  out.version = CONTENT_VERSION;
+  return out;
+}
+
+// Turn editing on/off for text inside root
+function setEditable(root = document) {
+  root.querySelectorAll('[data-edit], [data-field]').forEach(el => {
+    if (el.matches('input, select')) return;
+    if (!editing) { el.removeAttribute('contenteditable'); return; }
+    const mode = el.hasAttribute('data-multiline') ? 'true' : 'plaintext-only';
+    el.contentEditable = mode;
+    if (el.contentEditable !== mode) el.contentEditable = 'true';   // browsers without plaintext-only
+  });
+}
+
+function setEditing(on) {
+  editing = on;
+  document.body.classList.toggle('editing', on);
+  renderAll();
+  if (openIndex >= 0) renderModal();
+  setStatus('Editing · changes save in this browser');
+  nav.reselect();
+}
+$('edit-toggle').addEventListener('click', () => setEditing(true));
+
+// Typing into text / fields
+function readField(el) {
+  if (el.matches('input, select')) return el.value;
+  return el.dataset.field === 'story' ? el.innerText.replace(/\n{3,}/g, '\n\n').trim() : el.innerText.trim();
+}
+document.addEventListener('input', e => {
+  if (!editing) return;
+  const t = e.target;
+  const block = t.closest?.('[data-edit]');
+  if (block && t.isContentEditable) {
+    if (!block.textContent.trim() && !block.querySelector("img")) block.innerHTML = '';   // fully cleared: back to empty
+    C.text[block.dataset.edit] = block.innerHTML;
+    if (block.closest('nav')) nav.reselect();
+    if (block.dataset.edit === 'site-name') document.title = siteTitle();
+    return save();
+  }
+  const f = t.closest?.('[data-field]');
+  const itemEl = f?.closest('[data-list][data-i]');
+  if (!itemEl) return;
+  const item = C[itemEl.dataset.list][+itemEl.dataset.i];
+  const field = f.dataset.field;
+  item[field] = field === 'tags' ? readField(f).split(',').map(s => s.trim()).filter(Boolean) : readField(f);
+  save();
+});
+// Dropdowns and color pickers re-draw their section when they change
+document.addEventListener('change', e => {
+  if (!editing || !e.target.matches('select[data-field], input[type=color][data-field]')) return;
+  const list = e.target.closest('[data-list]').dataset.list;
+  rerender(list);
+  if (e.target.closest('.modal')) renderModal();
+});
+// Single-line text: Enter finishes editing
+document.addEventListener('keydown', e => {
+  if (editing && e.key === 'Enter' && e.target.isContentEditable && !e.target.closest('[data-multiline]')) {
+    e.preventDefault();
+    e.target.blur();
+  }
+});
+// Paste as plain text
+document.addEventListener('paste', e => {
+  if (!editing || !e.target.isContentEditable) return;
+  e.preventDefault();
+  document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
+});
+// Dropping an .stl on a viewer while editing saves it to that model
+document.addEventListener('stl-file', async e => {
+  if (!editing) return;
+  const itemEl = e.target.closest('[data-list="models"][data-i]');
+  if (!itemEl) return;
+  C.models[+itemEl.dataset.i].stl = await readDataURL(e.detail);
+  save();
+});
+
+// Clicks: in edit mode, editing text never triggers links/cards, and tool buttons run actions
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-act]');
+  if (btn && editing) {
+    e.preventDefault();
+    e.stopPropagation();
+    runAction(btn);
+    return;
+  }
+  if (!editing) return;
+  if (e.target.closest('[contenteditable]')) {
+    if (e.target.closest('a')) e.preventDefault();
+    e.stopPropagation();
+  } else if (e.target.closest('input, select, label.color-edit')) {
+    e.stopPropagation();
+  }
+}, true);
+
+// File pickers
+function pickFiles(accept, multiple = false) {
+  return new Promise(resolve => {
+    const input = Object.assign(document.createElement('input'), { type: 'file', accept, multiple });
+    input.addEventListener('change', () => resolve([...input.files]));
+    input.addEventListener('cancel', () => resolve([]));
+    input.click();
+  });
+}
+const readDataURL = file => new Promise((res, rej) => {
+  const r = new FileReader();
+  r.onload = () => res(r.result);
+  r.onerror = () => rej(r.error);
+  r.readAsDataURL(file);
+});
+// Big photos are scaled down (max 1800px) so the saved page stays fast
+async function readImage(file) {
+  const MAX = 1800;
+  try {
+    const bmp = await createImageBitmap(file);
+    if (file.size < 1.5e6 && Math.max(bmp.width, bmp.height) <= MAX) return readDataURL(file);
+    const k = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
+    const c = Object.assign(document.createElement('canvas'), { width: Math.round(bmp.width * k), height: Math.round(bmp.height * k) });
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    return c.toDataURL('image/webp', 0.86);
+  } catch {
+    return readDataURL(file);
+  }
+}
+async function pickImages(multiple = false) {
+  const files = await pickFiles('image/*', multiple);
+  setStatus('Adding…');
+  const urls = await Promise.all(files.map(readImage));
+  return urls;
+}
+
+const NEW_ITEM = {
+  gallery: () => ({ title: 'New piece', categories: galleryFilter === 'All' ? [] : [galleryFilter], location: '', image: 175 }),
+  creations: () => ({ name: 'New creation', cat: dishFilter === 'all' ? 'cooking' : dishFilter, photos: [], summary: 'A short line about what this is.', story: 'A longer description of this creation.' }),
+  projects: () => ({ name: 'New project', icon: 190, tags: ['Tag'], code: '', live: '', summary: 'What it does and why it is cool.' }),
+  models: () => ({ name: 'New model', summary: 'Short description', stl: '', color: '#1fb5a0', rim: '#2b7fd4' }),
+  skills: () => ({ name: 'New skill' }),
+};
+const PAGER_EL = { gallery: 'gallery-pager', creations: 'dish-pager', projects: 'project-pager', models: 'model-pager' };
+
+async function runAction(btn) {
+  const act = btn.dataset.act;
+  if (act === 'grip' || act === 'resize') return;                       // drag handle (see drag to reorder)
+
+  if (act === 'add') {
+    const list = btn.dataset.list;
+    C[list].push(NEW_ITEM[list]());
+    if (PAGER_EL[list]) $(PAGER_EL[list])._index = Infinity;   // jump to the last page
+    save();
+    return rerender(list);
+  }
+
+  if (act.startsWith('ph-')) return photoAction(act);
+
+  if (btn.closest('[data-single="feature"]')) {
+    if (act === 'crop') {
+      const v = await openCrop(FEAT().image, { freeAspect: true });
+      if (v) { FEAT().image = v; renderFeature(); save(); }
+      return;
+    }
+    const [url] = await pickImages();
+    if (url) { FEAT().image = url; renderFeature(); save(); }
+    return;
+  }
+
+  const itemEl = btn.closest('[data-list][data-i]');
+  const list = itemEl.dataset.list, i = +itemEl.dataset.i, arr = C[list];
+  switch (act) {
+    case 'prev':
+    case 'next': {
+      const j = i + (act === 'prev' ? -1 : 1);
+      if (j < 0 || j >= arr.length) return;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      break;
+    }
+    case 'delete':
+      if (!confirm(`Remove "${arr[i].name ?? arr[i].title}"?`)) return;
+      arr.splice(i, 1);
+      break;
+    case 'image': {
+      let url;
+      if (list === 'gallery') {                      // gallery items can be photos or videos
+        const [file] = await pickFiles('image/*,video/*');
+        if (!file) return;
+        if (file.type.startsWith('video/')) {
+          if (file.size > 150e6 && !confirm('This video is very large and may make the page slow. Use it anyway?')) return;
+          setStatus('Adding video…');
+          url = await readDataURL(file);
+        } else url = await readImage(file);
+      } else [url] = await pickImages();
+      if (!url) return;
+      arr[i][list === 'projects' ? 'icon' : 'image'] = url;
+      break;
+    }
+    case 'file': {                                   // any file visitors can download
+      const [file] = await pickFiles('');
+      if (!file) return;
+      if (file.size > 50e6 && !confirm(`${file.name} is ${fmtSize(file.size)}. Big files make the saved page slow. Attach it anyway?`)) return;
+      setStatus('Attaching…');
+      arr[i].download = { src: await readDataURL(file), name: file.name, size: file.size };
+      break;
+    }
+    case 'unfile':
+      if (!confirm(`Remove the download file "${arr[i].download?.name}"?`)) return;
+      delete arr[i].download;
+      break;
+    case 'stl': {
+      const [file] = await pickFiles('.stl');
+      if (!file) return;
+      arr[i].stl = await readDataURL(file);
+      break;
+    }
+    case 'tag': {                                    // gallery category tags
+      const cats = arr[i].categories = catsOf(arr[i]).slice();
+      const at = cats.indexOf(btn.dataset.tag);
+      at >= 0 ? cats.splice(at, 1) : cats.push(btn.dataset.tag);
+      cats.sort((a, b) => GALLERY_CATS.indexOf(a) - GALLERY_CATS.indexOf(b));
+      delete arr[i].category;
+      break;
+    }
+    case 'photos':
+      return openModal(list, i);
+    case 'crop': {
+      // gallery boxes can pick their own shape; cooking covers are 4:3
+      const v = list === 'gallery'
+        ? await openCrop(arr[i].image, { freeAspect: true })
+        : await openCrop(arr[i].photos[0], { aspect: 4 / 3 });
+      if (!v) return;
+      if (list === 'gallery') arr[i].image = v; else arr[i].photos[0] = v;
+      break;
+    }
+    case 'trim': {
+      const v = await openTrim(arr[i].image);
+      if (!v) return;
+      arr[i].image = v;
+      break;
+    }
+  }
+  save();
+  rerender(list);
+  if (list === 'gallery' && lb.classList.contains('open')) showLightbox(lbPos);
+}
+
+async function photoAction(act) {
+  const photos = photosOf(openItem());
+  const i = photoIndex;
+  switch (act) {
+    case 'ph-add': {
+      const urls = await pickImages(true);
+      if (!urls.length) return;
+      photos.push(...urls);
+      photoIndex = photos.length - urls.length;
+      break;
+    }
+    case 'ph-replace': {
+      if (!photos.length) return;
+      const [url] = await pickImages();
+      if (!url) return;
+      photos[i] = url;
+      break;
+    }
+    case 'ph-crop': {
+      if (!isImg(photos[i])) return;
+      const v = await openCrop(photos[i], { aspect: 4 / 3 });
+      if (!v) return;
+      photos[i] = v;
+      break;
+    }
+    case 'ph-left':
+    case 'ph-right': {
+      const j = i + (act === 'ph-left' ? -1 : 1);
+      if (j < 0 || j >= photos.length) return;
+      [photos[i], photos[j]] = [photos[j], photos[i]];
+      photoIndex = j;
+      break;
+    }
+    case 'ph-cover':
+      if (i === 0 || !photos.length) return;
+      photos.unshift(photos.splice(i, 1)[0]);
+      photoIndex = 0;
+      break;
+    case 'ph-delete':
+      if (!photos.length || !confirm('Remove this photo?')) return;
+      photos.splice(i, 1);
+      photoIndex = Math.max(0, i - 1);
+      break;
+  }
+  save();
+  renderModal();
+}
+
+/* Trim dialog: pick a start and end. Resolves with the new video value, or null if cancelled.
+   Nothing is cut from the file; the site just plays the part between start and end. */
+function openTrim(value) {
+  const base = typeof value === 'object' ? { ...value } : { src: value };
+  const modalEl = $('trim'), v = $('trim-video'), sIn = $('trim-start'), eIn = $('trim-end');
+  const keep = modalEl.querySelector('.keep'), head = modalEl.querySelector('.playhead');
+  let start = +base.start || 0, end = +base.end || 0, dur = 0, previewing = false;
+  v.poster = base.poster || '';
+  v.src = base.src;
+  function paint() {
+    if (!dur) return;
+    sIn.max = eIn.max = dur.toFixed(2);
+    sIn.value = start; eIn.value = end;
+    $('trim-start-val').textContent = fmtTime(start);
+    $('trim-end-val').textContent = fmtTime(end);
+    keep.style.left = (start / dur * 100) + '%';
+    keep.style.width = ((end - start) / dur * 100) + '%';
+    head.style.left = (v.currentTime / dur * 100) + '%';
+    const cut = start + (dur - end);
+    $('trim-summary').textContent = cut > 0.05
+      ? `Plays ${fmtTime(end - start)} of ${fmtTime(dur)}: ${start.toFixed(1)} s trimmed from the start and ${(dur - end).toFixed(1)} s from the end.`
+      : `Plays the whole video (${fmtTime(dur)}).`;
+  }
+  v.onloadedmetadata = () => { dur = v.duration; if (!end || end > dur) end = dur; v.currentTime = start; paint(); };
+  v.ontimeupdate = () => {
+    if (previewing && v.currentTime >= end) { v.pause(); v.currentTime = end; previewing = false; }
+    paint();
+  };
+  sIn.oninput = () => { start = Math.min(+sIn.value, end - 0.5); v.currentTime = start; paint(); };
+  eIn.oninput = () => { end = Math.max(+eIn.value, start + 0.5); v.currentTime = end; paint(); };
+  modalEl.classList.add('open');
+  modalEl.setAttribute('aria-hidden', 'false');
+
+  return new Promise(resolve => {
+    modalEl.querySelector('.trim-card').onclick = e => {
+      const cmd = e.target.closest('[data-trim]')?.dataset.trim;
+      if (!cmd) return;
+      if (cmd === 'set-start') { start = Math.min(v.currentTime, end - 0.5); return paint(); }
+      if (cmd === 'set-end') { end = Math.max(v.currentTime, start + 0.5); return paint(); }
+      if (cmd === 'preview') { previewing = true; v.currentTime = start; v.play(); return; }
+      if (cmd === 'reset') { start = 0; end = dur; v.currentTime = 0; return paint(); }
+      modalEl.classList.remove('open');
+      modalEl.setAttribute('aria-hidden', 'true');
+      v.pause(); v.removeAttribute('src'); v.load();
+      if (cmd === 'cancel' || !dur) return resolve(null);
+      const out = { ...base };
+      delete out.start; delete out.end;
+      if (start > 0.05) out.start = Math.round(start * 100) / 100;
+      if (dur - end > 0.05) out.end = Math.round(end * 100) / 100;
+      resolve(out);
+    };
+  });
+}
+// Length shown in the gallery viewer, taking a trim into account
+function trimmedLength(img, full) {
+  if (!img || typeof img !== 'object' || !(img.start || img.end) || !full) return full;
+  const [m, sec] = full.split(':').map(Number), total = m * 60 + sec;
+  const len = (img.end || total) - (img.start || 0);
+  return `${Math.floor(len / 60)}:${String(Math.floor(len % 60)).padStart(2, '0')} (trimmed from ${full})`;
+}
+
+/* Crop / adjust dialog. Resolves with the new image value, or null if cancelled.
+   opts.aspect: the shape of the spot the image sits in (width / height)
+   opts.freeAspect: let the user pick the shape (gallery) */
+const cropUI = {
+  modal: $('crop'), frame: $('crop-frame'), zoom: $('crop-zoom'), fit: $('crop-fit'), aspects: $('crop-aspects'),
+};
+/* Rotating: a rotated photo is saved as a rotated copy (so every box fits it correctly),
+   and the original is kept in "orig" so it can be rotated again or reset. */
+function bakeRotation(src, rotate, tilt, maxSide) {
+  return new Promise((resolve, reject) => {
+    const im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, maxSide / Math.max(im.naturalWidth, im.naturalHeight));
+      const w = Math.round(im.naturalWidth * k), h = Math.round(im.naturalHeight * k);
+      const quarter = ((rotate % 360) + 360) % 360 % 180 === 90;
+      const cw = quarter ? h : w, ch = quarter ? w : h;
+      const t = Math.abs(tilt) * Math.PI / 180;
+      // straightening zooms in just enough that no empty corners show
+      const fill = Math.max((cw * Math.cos(t) + ch * Math.sin(t)) / cw, (cw * Math.sin(t) + ch * Math.cos(t)) / ch);
+      const c = Object.assign(document.createElement('canvas'), { width: cw, height: ch });
+      const g = c.getContext('2d');
+      g.imageSmoothingQuality = 'high';
+      g.translate(cw / 2, ch / 2);
+      g.rotate((rotate + tilt) * Math.PI / 180);
+      g.scale(fill, fill);
+      g.drawImage(im, -w / 2, -h / 2, w, h);
+      resolve(c.toDataURL('image/webp', 0.9));
+    };
+    im.onerror = reject;
+    im.src = src;
+  });
+}
+
+function openCrop(value, opts = {}) {
+  if (!isImg(value)) return Promise.resolve(null);
+  const DEFAULT = { x: 50, y: 50, zoom: 1, fit: 'contain', aspect: '', rotate: 0, tilt: 0 };
+  let st = { ...DEFAULT, ...(typeof value === 'object' ? value : { src: value }) };
+  const original = st.orig || st.src;                 // always rotate from the original
+  const { modal, frame, zoom, fit, aspects } = cropUI;
+  const rotUI = $('crop-rotate'), tiltIn = $('crop-tilt');
+  aspects.style.display = opts.freeAspect ? '' : 'none';
+  rotUI.style.display = isVideo(st) ? 'none' : '';
+  frame.innerHTML = isVideo(st)
+    ? `<video disablepictureinpicture controlslist="nopictureinpicture" src="${esc(st.src)}"${st.poster ? ` poster="${esc(st.poster)}"` : ''} muted autoplay loop playsinline></video>`
+    : `<img src="${esc(st.rotate || st.tilt ? st.src : original)}" alt="">`;
+  const img = frame.firstElementChild;
+
+  const ratio = () => {
+    if (!opts.freeAspect) return opts.aspect || 4 / 3;
+    if (st.aspect) { const [a, b] = st.aspect.split('/').map(Number); return a / b; }
+    const w = img.naturalWidth || img.videoWidth, h = img.naturalHeight || img.videoHeight;
+    return w && h ? w / h : (isVideo(st) ? 16 / 9 : 4 / 3);
+  };
+  function paint() {
+    const r = ratio();
+    const w = Math.min(560, window.innerWidth - 80, window.innerHeight * 0.5 * r);
+    frame.style.width = w + 'px';
+    frame.style.aspectRatio = String(r);
+    img.style.cssText = cropStyle(st);
+    zoom.value = st.zoom;
+    fit.checked = st.fit === 'contain';
+    zoom.disabled = fit.checked;
+    tiltIn.value = st.tilt;
+    $('crop-tilt-val').textContent = (st.tilt > 0 ? '+' : '') + st.tilt + '°';
+    [...aspects.children].forEach(b => b.classList.toggle('on', b.dataset.aspect === (st.aspect || '')));
+  }
+  if (isVideo(st)) img.addEventListener('loadedmetadata', paint, { once: true });
+  else img.onload = paint;                            // also re-fits after each rotation preview
+
+  // Rotation preview: a quick low-res rotated copy (the full-size one is made on Save)
+  let previewTimer;
+  function previewRotation() {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(async () => {
+      img.src = st.rotate || st.tilt ? await bakeRotation(original, st.rotate, st.tilt, 900) : original;
+    }, 60);
+  }
+  rotUI.onclick = e => {
+    const b = e.target.closest('[data-rot]');
+    if (!b) return;
+    st.rotate = (((st.rotate + +b.dataset.rot) % 360) + 360) % 360;
+    previewRotation();
+  };
+  tiltIn.oninput = () => { st.tilt = +tiltIn.value; paint(); previewRotation(); };
+
+  // Drag to move the focus point
+  let drag = null;
+  const onDown = e => { if (st.fit === 'contain') return; drag = { x: e.clientX, y: e.clientY, sx: st.x, sy: st.y }; frame.setPointerCapture(e.pointerId); frame.classList.add('dragging'); };
+  const onMove = e => {
+    if (!drag) return;
+    const k = 150 / Math.max(st.zoom, 1);
+    st.x = Math.max(0, Math.min(100, drag.sx - (e.clientX - drag.x) / frame.clientWidth * k));
+    st.y = Math.max(0, Math.min(100, drag.sy - (e.clientY - drag.y) / frame.clientHeight * k));
+    paint();
+  };
+  const onUp = () => { drag = null; frame.classList.remove('dragging'); };
+  frame.addEventListener('pointerdown', onDown);
+  frame.addEventListener('pointermove', onMove);
+  frame.addEventListener('pointerup', onUp);
+  frame.addEventListener('pointercancel', onUp);
+  zoom.oninput = () => { st.zoom = +zoom.value; paint(); };
+  fit.onchange = () => { st.fit = fit.checked ? 'contain' : 'cover'; if (fit.checked) st.zoom = 1; paint(); };
+  aspects.onclick = e => { const b = e.target.closest('button'); if (b) { st.aspect = b.dataset.aspect; paint(); } };
+
+  paint();
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+
+  return new Promise(resolve => {
+    modal.querySelector('.crop-actions').onclick = async e => {
+      const cmd = e.target.closest('[data-crop]')?.dataset.crop;
+      if (!cmd) return;
+      if (cmd === 'reset') {
+        const hadRotation = st.rotate || st.tilt;
+        st = { ...DEFAULT, src: original, poster: st.poster };
+        if (hadRotation && !isVideo(st)) img.src = original;
+        return paint();
+      }
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      frame.removeEventListener('pointerdown', onDown);
+      frame.removeEventListener('pointermove', onMove);
+      frame.removeEventListener('pointerup', onUp);
+      frame.removeEventListener('pointercancel', onUp);
+      clearTimeout(previewTimer);
+      frame.innerHTML = '';                            // stops a previewing video
+      if (cmd === 'cancel') return resolve(null);
+      const rotated = !isVideo(st) && (st.rotate || st.tilt);
+      const changed = Object.keys(DEFAULT).some(k => st[k] !== DEFAULT[k]);
+      if (!changed) return resolve(st.poster ? { src: original, poster: st.poster } : original);   // untouched: keep it plain
+      const out = st.poster ? { src: original, poster: st.poster } : { src: original };
+      for (const k of Object.keys(DEFAULT)) if (st[k] !== DEFAULT[k]) out[k] = typeof st[k] === 'number' ? Math.round(st[k] * 100) / 100 : st[k];
+      if (rotated) {
+        setStatus('Rotating…');
+        out.orig = original;
+        out.src = await bakeRotation(original, st.rotate, st.tilt, 2400);
+      }
+      resolve(out);
+    };
+  });
+}
+
+/* Drag to reorder (Edit mode): grab an item's handle, or a photo in a pop-up's strip.
+   Drop onto the middle of another item to swap the two; drop near an item's edge or in the
+   gap between two items to insert it there. Hovering a page arrow flips to that page. */
+(() => {
+  const VERTICAL = { get gallery() { return !document.body.classList.contains('single'); }, projects: true, models: true };   // lists that read top-to-bottom
+  let d = null, flipTimer = null, suppressClick = false;
+  const moveItem = (arr, from, to) => { const [x] = arr.splice(from, 1); if (to > from) to--; arr.splice(to, 0, x); return to; };
+  const clearDrop = () => document.querySelectorAll('[data-drop]').forEach(el => el.removeAttribute('data-drop'));
+  const EDGE = 0.25;                                // outer quarter on each side = insert
+  const candidates = () => d.list === 'photos'
+    ? [...document.querySelectorAll('#m-thumbs button')]
+    : [...document.querySelectorAll(`[data-list="${d.list}"][data-i]:not(.modal-card):not(#lb-info)`)].filter(el => !el.closest('[inert]'));
+  function targetAt(x, y) {
+    const v = VERTICAL[d.list];
+    const el = document.elementFromPoint(x, y);
+    let t = el && (d.list === 'photos' ? el.closest('#m-thumbs button') : el.closest(`[data-list="${d.list}"][data-i]:not(.modal-card):not(#lb-info)`));
+    if (t === d.item) return null;
+    if (t) {
+      const r = t.getBoundingClientRect();
+      const rel = v ? (y - r.top) / r.height : (x - r.left) / r.width;
+      if (rel < EDGE) return { t, mode: 'before' };
+      if (rel > 1 - EDGE) return { t, mode: 'after' };
+      return { t, mode: 'swap' };
+    }
+    // in a gap: insert next to the closest item (within 40px)
+    let best = null, bestDist = 40;
+    for (const c of candidates()) {
+      if (c === d.item) continue;
+      const r = c.getBoundingClientRect();
+      const dist = Math.hypot(Math.max(r.left - x, 0, x - r.right), Math.max(r.top - y, 0, y - r.bottom));
+      if (dist < bestDist) { bestDist = dist; best = c; }
+    }
+    if (!best) return null;
+    const r = best.getBoundingClientRect();
+    return { t: best, mode: (v ? y > r.top + r.height / 2 : x > r.left + r.width / 2) ? 'after' : 'before' };
+  }
+
+  document.addEventListener('pointerdown', e => {
+    if (!editing || e.button !== 0) return;
+    const grip = e.target.closest('[data-act=grip]');
+    const thumb = !grip && e.target.closest('#m-thumbs button');
+    if (!grip && !thumb) return;
+    const item = grip ? grip.closest('[data-list][data-i]') : thumb;
+    if (!item) return;
+    e.preventDefault();
+    d = { item, list: grip ? item.dataset.list : 'photos', from: grip ? +item.dataset.i : +thumb.dataset.j, x0: e.clientX, y0: e.clientY, started: false };
+  }, true);
+
+  document.addEventListener('pointermove', e => {
+    if (!d) return;
+    if (!d.started) {
+      if (Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 6) return;
+      const r = d.item.getBoundingClientRect();
+      d.started = true;
+      d.dx = d.x0 - r.left; d.dy = d.y0 - r.top;
+      d.ghost = d.item.cloneNode(true);
+      d.ghost.classList.add('drag-ghost');
+      ['data-list', 'data-i', 'data-j'].forEach(a => d.ghost.removeAttribute(a));   // so it never counts as a drop target
+      Object.assign(d.ghost.style, { width: r.width + 'px', height: r.height + 'px' });
+      document.body.appendChild(d.ghost);
+      d.item.classList.add('drag-src');
+      document.documentElement.classList.add('no-select', 'dragging-item');
+    }
+    d.ghost.style.left = (e.clientX - d.dx) + 'px';
+    d.ghost.style.top = (e.clientY - d.dy) + 'px';
+
+    clearDrop();
+    d.drop = targetAt(e.clientX, e.clientY);
+    if (d.drop) d.drop.t.dataset.drop = d.drop.mode === 'swap' ? 'swap' : `${d.drop.mode}-${VERTICAL[d.list] ? 'y' : 'x'}`;
+
+    // hovering a page arrow flips the page; near the window edge scrolls it
+    const arrow = document.elementFromPoint(e.clientX, e.clientY)?.closest('.pager-btn:not(:disabled)');
+    if (arrow !== d.arrow) {
+      clearTimeout(flipTimer);
+      d.arrow = arrow;
+      if (arrow) flipTimer = setTimeout(function flip() { arrow.click(); if (!arrow.disabled && d?.arrow === arrow) flipTimer = setTimeout(flip, 900); }, 600);
+    }
+    if (e.clientY < 70) window.scrollBy(0, -14); else if (e.clientY > innerHeight - 70) window.scrollBy(0, 14);
+  });
+
+  function finish(apply) {
+    clearTimeout(flipTimer);
+    if (!d) return;
+    const { started, drop, list, from } = d;
+    if (started) {
+      d.ghost.remove();
+      d.item.classList.remove('drag-src');
+      document.documentElement.classList.remove('no-select', 'dragging-item');
+      clearDrop();
+      suppressClick = true;
+      setTimeout(() => (suppressClick = false), 0);
+    }
+    d = null;
+    if (!apply || !started || !drop) return;
+    const arr = list === 'photos' ? photosOf(openItem()) : C[list];
+    const at = +(list === 'photos' ? drop.t.dataset.j : drop.t.dataset.i);
+    let landed;
+    if (drop.mode === 'swap') { [arr[from], arr[at]] = [arr[at], arr[from]]; landed = at; }
+    else landed = moveItem(arr, from, at + (drop.mode === 'after' ? 1 : 0));
+    save();
+    if (list === 'photos') { photoIndex = landed; renderModal(); } else rerender(list);
+  }
+  document.addEventListener('pointerup', () => finish(true));
+  document.addEventListener('pointercancel', () => finish(false));
+  addEventListener('keydown', e => { if (e.key === 'Escape' && d) finish(false); });
+  document.addEventListener('click', e => { if (suppressClick) { e.preventDefault(); e.stopPropagation(); } }, true);
+})();
+
+// Edit bar commands
+$('edit-bar').addEventListener('click', async e => {
+  const cmd = e.target.closest('[data-cmd]')?.dataset.cmd;
+  if (cmd === 'done') setEditing(false);
+  if (cmd === 'export') {
+    const blob = new Blob([JSON.stringify(C, null, 2)], { type: 'application/json' });
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'portfolio-content.json' });
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  if (cmd === 'import') {
+    const [file] = await pickFiles('.json,application/json');
+    if (!file) return;
+    try {
+      C = mergeDefaults(JSON.parse(await file.text()));
+      await db.set('content', C);
+      location.reload();
+    } catch (err) { alert('That file could not be imported: ' + err.message); }
+  }
+  if (cmd === 'reset') {
+    if (!confirm('Throw away all your edits and go back to the original content?')) return;
+    try { await db.del('content'); } catch {}
+    location.reload();
+  }
+});
+
+/* =========================================================
+   Start up: load saved edits, then draw the page
+   ========================================================= */
+(async () => {
+  try {
+    const saved = null;                             // published copy: always the built-in content
+    if (saved) C = mergeDefaults(saved);
+  } catch { /* storage blocked: defaults only */ }
+  applyText();
+  renderAll();
+  nav.start();
+})();
+</script>
+</body>
+</html>
